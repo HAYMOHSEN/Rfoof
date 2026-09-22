@@ -1,0 +1,50 @@
+{
+  "id": "rfoof",
+  "name": "Rfoof – Documents & Files Organizer",
+  "short_name": "Rfoof",
+  "description": "Organize documents, photos and files in colorful folders. Works offline, searches inside files, backs up and syncs with OneDrive. English and Arabic.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
+  "background_color": "#f3f3f3",
+  "theme_color": "#2f6fdb",
+  "lang": "en",
+  "dir": "auto",
+  "categories": ["productivity", "utilities", "business"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "screenshots": [
+    { "src": "screenshots/library-light.png", "sizes": "1600x1000", "type": "image/png", "form_factor": "wide", "label": "Library with colorful folders" },
+    { "src": "screenshots/library-dark-ar.png", "sizes": "1600x1000", "type": "image/png", "form_factor": "wide", "label": "Arabic interface in dark mode" },
+    { "src": "screenshots/viewer.png", "sizes": "1600x1000", "type": "image/png", "form_factor": "wide", "label": "Built-in file viewer" }
+  ],
+  "shortcuts": [
+    { "name": "Add files", "short_name": "Add", "url": "./?action=import", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Starred", "short_name": "Starred", "url": "./?view=starred", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Recent", "short_name": "Recent", "url": "./?view=recent", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ],
+  "file_handlers": [
+    {
+      "action": "./?action=open",
+      "accept": {
+        "application/pdf": [".pdf"],
+        "image/*": [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".svg", ".avif"],
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document": [".docx"],
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+        "application/vnd.openxmlformats-officedocument.presentationml.presentation": [".pptx"],
+        "text/plain": [".txt", ".md"],
+        "text/csv": [".csv"],
+        "application/zip": [".zip"]
+      }
+    }
+  ],
+  "launch_handler": { "client_mode": "focus-existing" },
+  "prefer_related_applications": false
+}
