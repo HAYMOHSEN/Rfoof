@@ -1,0 +1,12 @@
+// Rfoof logo – a tidy shelf of documents
+export const LOGO_SVG = `<svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <linearGradient id="rfg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2f6fdb"/><stop offset="1" stop-color="#7a5af5"/></linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#rfg)"/>
+  <rect x="11" y="47" width="42" height="4.5" rx="2.25" fill="#fff" opacity=".95"/>
+  <rect x="14" y="21" width="8" height="23" rx="2" fill="#fff"/>
+  <rect x="24.5" y="14" width="8" height="30" rx="2" fill="#fff" opacity=".88"/>
+  <rect x="35" y="25" width="8" height="19" rx="2" fill="#fff" opacity=".75"/>
+  <rect x="44" y="17" width="7" height="27" rx="2" fill="#fff" opacity=".95" transform="rotate(-9 47.5 44)"/>
+</svg>`;
