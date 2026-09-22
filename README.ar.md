@@ -60,7 +60,7 @@ rfoof/
 1. أنشئ مستودعًا جديدًا على GitHub باسم `rfoof` (عام Public).
 2. ارفع **كل محتويات** المجلد إليه (يمكن السحب والإفلات من صفحة المستودع ← *Add file ▸ Upload files*). تأكد أن `index.html` في جذر المستودع.
 3. من *Settings ▸ Pages*: المصدر **Deploy from a branch**، الفرع `main`، المجلد `/ (root)` ثم Save.
-4. بعد دقيقة يصبح التطبيق متاحًا على: `https://haymohsen.github.io/rfoof/` (استبدل اسم المستخدم إذا كان مختلفًا). هذا العنوان هو ما ستستخدمه في كل الخطوات التالية — **بالشرطة المائلة في النهاية**.
+4. بعد دقيقة يصبح التطبيق متاحًا على: `https://haymohsen.github.io/Rfoof/` (استبدل اسم المستخدم إذا كان مختلفًا). هذا العنوان هو ما ستستخدمه في كل الخطوات التالية — **بالشرطة المائلة في النهاية**.
 
 جرّب التطبيق الآن: أضف ملفات، أنشئ مجلدات، ابحث، ثم أغلق الإنترنت وأعد فتح الصفحة — يجب أن يعمل كاملًا.
 
@@ -75,7 +75,7 @@ rfoof/
 3. املأ:
    - **Name**: `Rfoof`
    - **Supported account types**: *Accounts in any organizational directory (Any Microsoft Entra ID tenant – Multitenant) and personal Microsoft accounts (e.g. Skype, Xbox)* — هذا الخيار ضروري ليعمل مع كل المستخدمين.
-   - **Redirect URI**: اختر المنصة **Single-page application (SPA)** وأدخل `https://haymohsen.github.io/rfoof/`
+   - **Redirect URI**: اختر المنصة **Single-page application (SPA)** وأدخل `https://haymohsen.github.io/Rfoof/`
 4. اضغط **Register**. في صفحة النظرة العامة انسخ **Application (client) ID** (يشبه `3f1a…-…`).
 5. من **API permissions ▸ + Add a permission ▸ Microsoft Graph ▸ Delegated permissions** أضف:
    - `User.Read`
@@ -88,7 +88,7 @@ rfoof/
    ```js
    msClientId: '3f1a....-....-....-....-............',
    ```
-   ثم ارفع الملف إلى GitHub. (اختياريًا: من **Branding & properties** أضف شعار التطبيق `icons/icon-512.png` ورابط سياسة الخصوصية `https://haymohsen.github.io/rfoof/privacy.html` ليظهرا في شاشة الموافقة.)
+   ثم ارفع الملف إلى GitHub. (اختياريًا: من **Branding & properties** أضف شعار التطبيق `icons/icon-512.png` ورابط سياسة الخصوصية `https://haymohsen.github.io/Rfoof/privacy.html` ليظهرا في شاشة الموافقة.)
 8. افتح التطبيق ← الإعدادات ← *الحساب و OneDrive* ← **تسجيل الدخول بحساب Microsoft**. بعد الموافقة ستجد ملفاتك في `OneDrive ▸ Apps ▸ Rfoof` وستتزامن مع أي جهاز تسجّل الدخول منه (تطبيق المتجر، أو المتصفح على أي حاسوب أو هاتف عبر نفس الرابط).
 
 **كيف تعمل المزامنة؟** يُرفع كل ملف إلى مجلد OneDrive يطابق مجلده في التطبيق، ويُحفظ ملف `rfoof-index.json` يحتوي الوسوم والألوان والملاحظات والعناوين. عند تسجيل الدخول من جهاز جديد تُنزَّل القائمة فورًا وتُنزَّل الملفات نفسها عند فتحها (أو كلها إذا فعّلت "إبقاء جميع الملفات متاحة دون اتصال"). التعديلات من أجهزة مختلفة تُدمج بحسب الأحدث، والملفات المحذوفة تنتقل إلى `Apps/Rfoof/.Trash` حتى تُفرغ السلة.
@@ -99,10 +99,10 @@ rfoof/
 
 1. في **Partner Center** (<https://partner.microsoft.com/dashboard>) ← Apps and games ← **+ New product ▸ MSIX or PWA app** ← احجز الاسم `Rfoof` (أو `Rfoof – Documents Organizer` إن كان محجوزًا).
 2. من صفحة المنتج ← **Product management ▸ Product identity** انسخ القيم الثلاث: **Package/Identity/Name**، **Package/Identity/Publisher**، **Publisher display name**.
-3. افتح <https://www.pwabuilder.com> وأدخل `https://haymohsen.github.io/rfoof/` ← **Start** ← **Package for stores ▸ Windows**.
+3. افتح <https://www.pwabuilder.com> وأدخل `https://haymohsen.github.io/Rfoof/` ← **Start** ← **Package for stores ▸ Windows**.
 4. الصق القيم الثلاث في النموذج، واتركِ باقي الخيارات الافتراضية، ثم **Download package**.
 5. في Partner Center ← **Submission ▸ Packages** ارفع ملف `.msixbundle` (وملف `.classic.appxbundle` إذا وُجد داخل الحزمة نفسها).
-6. أكمل بقية الطلب: التسعير، الفئة **Productivity**، التصنيف العمري، **Privacy policy URL** = `https://haymohsen.github.io/rfoof/privacy.html`، اللقطات من مجلد `screenshots/`، والوصف أدناه. ثم Submit.
+6. أكمل بقية الطلب: التسعير، الفئة **Productivity**، التصنيف العمري، **Privacy policy URL** = `https://haymohsen.github.io/Rfoof/privacy.html`، اللقطات من مجلد `screenshots/`، والوصف أدناه. ثم Submit.
 
 بعد النشر، أي تحديث ترفعه إلى GitHub Pages يصل تلقائيًا للمستخدمين دون إعادة إرسال للمتجر (فقط غيّر `VERSION` في `sw.js` و`version` في `config.js`). أعد الإرسال فقط إذا غيّرت الأيقونات أو بيانات `manifest.webmanifest`.
 
@@ -179,8 +179,9 @@ Partner Center ← **Attract ▸ Promo codes ▸ Order codes**: حتى 1600 كو
 ## استخدامه على حاسوبك الآن (سطح المكتب)
 
 **الطريقة 1 — الأفضل: تثبيته كتطبيق من Edge** (بعد رفعه إلى GitHub Pages)
-1. افتح `https://haymohsen.github.io/rfoof/` في Microsoft Edge.
-2. اضغط أيقونة **تثبيت التطبيق** في شريط العنوان (أو القائمة ⋯ ← Apps ← Install Rfoof).
+1. افتح `https://haymohsen.github.io/Rfoof/` في Microsoft Edge (العنوان حسّاس لحالة الأحرف: حرف **R** كبير كما يظهر تمامًا في Settings ▸ Pages على GitHub).
+2. اضغط الزر الأزرق **تثبيت رفوف على هذا الجهاز** أسفل الشريط الجانبي (وهو موجود أيضًا في الإعدادات ← عام ← *التثبيت كتطبيق*). الطريقة نفسها متاحة من Edge: أيقونة التثبيت الصغيرة في طرف شريط العنوان، أو القائمة ⋯ ← **التطبيقات (Apps)** ← **تثبيت Rfoof**.
+   لا يظهر الزر إلا عندما يعتبر المتصفح الموقع قابلًا للتثبيت، وهذا يتطلب HTTPS وتحميل الصفحة كاملة. إن لم تره: أعد التحميل بـ **Ctrl+F5**، وتأكد أنك في Edge أو Chrome (Firefox لا يثبّت تطبيقات الويب)، وتأكد أن التطبيق ليس مثبّتًا من قبل (عندها تجده في قائمة ابدأ ولا يعرض Edge تثبيته مجددًا).
 3. يظهر رفوف في قائمة ابدأ وشريط المهام كنافذة مستقلة، يعمل أوفلاين ويحصل على التحديثات تلقائيًا. (هذه النسخة لك أنت؛ الزبائن يحصلون عليها من المتجر.)
 4. لتفعيل النسخة الكاملة على جهازك دون شراء: أدخل مفتاحك الشخصي (بصمته موجودة مسبقًا في `config.js`، والمفتاح نفسه أُرسل إليك بشكل خاص — لا تكتبه في أي ملف عام) في الإعدادات ← الترخيص ← تفعيل. يمكنك توليد مفاتيح إضافية من `tools/license-key.html`.
 

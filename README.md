@@ -60,7 +60,7 @@ There is **no build step** — upload the files as they are.
 1. Create a new public repository on GitHub named `rfoof`.
 2. Upload **all** contents of this folder (drag & drop on the repository page → *Add file ▸ Upload files*). `index.html` must be at the repository root.
 3. *Settings ▸ Pages*: Source **Deploy from a branch**, branch `main`, folder `/ (root)` → Save.
-4. After a minute the app is live at `https://haymohsen.github.io/rfoof/` (replace the user name if different). Use this exact URL — **with the trailing slash** — in every step below.
+4. After a minute the app is live at `https://haymohsen.github.io/Rfoof/` (replace the user name if different). Use this exact URL — **with the trailing slash** — in every step below.
 
 Try it: add files, create folders, search, then go offline and reload — it must keep working.
 
@@ -75,7 +75,7 @@ Free, about five minutes, and it is what makes "access from anywhere with userna
 3. Fill in:
    - **Name**: `Rfoof`
    - **Supported account types**: *Accounts in any organizational directory (Multitenant) and personal Microsoft accounts (e.g. Skype, Xbox)* — required so every user can sign in.
-   - **Redirect URI**: platform **Single-page application (SPA)**, value `https://haymohsen.github.io/rfoof/`
+   - **Redirect URI**: platform **Single-page application (SPA)**, value `https://haymohsen.github.io/Rfoof/`
 4. **Register**, then copy the **Application (client) ID** from the Overview page.
 5. **API permissions ▸ + Add a permission ▸ Microsoft Graph ▸ Delegated permissions**: add `User.Read`, `Files.ReadWrite.AppFolder`, `offline_access`. No admin consent is needed.
 6. **Authentication**: make sure the URI is listed under *Single-page application* (not *Web*), otherwise the token exchange fails because of CORS. You may also add `http://localhost:8080/` for local testing.
@@ -83,7 +83,7 @@ Free, about five minutes, and it is what makes "access from anywhere with userna
    ```js
    msClientId: '3f1a....-....-....-....-............',
    ```
-   Optional: under **Branding & properties** add the logo (`icons/icon-512.png`) and the privacy URL (`https://haymohsen.github.io/rfoof/privacy.html`) so they appear on the consent screen.
+   Optional: under **Branding & properties** add the logo (`icons/icon-512.png`) and the privacy URL (`https://haymohsen.github.io/Rfoof/privacy.html`) so they appear on the consent screen.
 8. In the app: Settings ▸ *Account & OneDrive* ▸ **Sign in with Microsoft**. After consenting, the library appears in `OneDrive ▸ Apps ▸ Rfoof` and syncs with every device you sign in on (the Store app, or the same URL in any browser on any computer or phone).
 
 **How sync works.** Every file is uploaded into a OneDrive folder that mirrors its Rfoof folder, and `rfoof-index.json` stores titles, tags, colors and notes. A new device downloads the list immediately and fetches file bytes when a file is opened (or all of them with *Keep all files available offline*). Edits from different devices merge last-writer-wins; deleted files move to `Apps/Rfoof/.Trash` until the trash is emptied.
@@ -94,10 +94,10 @@ Free, about five minutes, and it is what makes "access from anywhere with userna
 
 1. In **Partner Center** (<https://partner.microsoft.com/dashboard>) → Apps and games → **+ New product ▸ MSIX or PWA app** → reserve the name `Rfoof` (or `Rfoof – Documents Organizer` if taken).
 2. On the product page → **Product management ▸ Product identity**: copy **Package/Identity/Name**, **Package/Identity/Publisher** and **Publisher display name**.
-3. Open <https://www.pwabuilder.com>, enter `https://haymohsen.github.io/rfoof/` → **Start** → **Package for stores ▸ Windows**.
+3. Open <https://www.pwabuilder.com>, enter `https://haymohsen.github.io/Rfoof/` → **Start** → **Package for stores ▸ Windows**.
 4. Paste the three values, keep the defaults, **Download package**.
 5. In Partner Center → **Submission ▸ Packages** upload the `.msixbundle` (and the `.classic.appxbundle` if present in the same download).
-6. Complete the submission: pricing, category **Productivity**, age rating, **Privacy policy URL** = `https://haymohsen.github.io/rfoof/privacy.html`, screenshots from `screenshots/`, and the listing text below. Submit.
+6. Complete the submission: pricing, category **Productivity**, age rating, **Privacy policy URL** = `https://haymohsen.github.io/Rfoof/privacy.html`, screenshots from `screenshots/`, and the listing text below. Submit.
 
 After publishing, any update you push to GitHub Pages reaches users automatically without a new Store submission (just bump `VERSION` in `sw.js` and `version` in `config.js`). Resubmit only when icons or `manifest.webmanifest` change.
 
@@ -165,8 +165,9 @@ Partner Center → **Attract ▸ Promo codes ▸ Order codes**: up to 1,600 code
 ## Using it on your own desktop right now
 
 **Option 1 — best: install it as an app from Edge** (after publishing to GitHub Pages)
-1. Open `https://haymohsen.github.io/rfoof/` in Microsoft Edge.
-2. Click the **Install app** icon in the address bar (or ⋯ menu → Apps → Install Rfoof).
+1. Open `https://haymohsen.github.io/Rfoof/` in Microsoft Edge (the path is case-sensitive: capital **R**, exactly as GitHub shows it in Settings ▸ Pages).
+2. Click the blue **Install Rfoof on this device** button at the bottom of the sidebar (also in Settings ▸ General ▸ *Install as an app*). The same thing is available from Edge itself: the small install icon at the end of the address bar, or ⋯ menu ▸ **Apps** ▸ **Install Rfoof**.
+   The button only appears when the browser considers the site installable — that needs HTTPS and a fully loaded page. If you don't see it: reload with **Ctrl+F5**, make sure you are in Edge or Chrome (Firefox cannot install web apps), and check that the app is not already installed (then it is in the Start menu, and Edge no longer offers to install it).
 3. Rfoof appears in the Start menu and taskbar as its own window, works offline and updates automatically. (This copy is for you; customers get theirs from the Store.)
 4. To unlock the full version on your own machine without buying: enter your personal key (its hash is already in `config.js`; the key itself was sent to you privately — never write it into a public file) in Settings → License → Activate. Generate more keys with `tools/license-key.html`.
 

@@ -9,6 +9,7 @@ import { APP } from '../config.js';
 import { app } from '../app.js';
 import { auth } from '../auth.js';
 import { license, licenseEvents } from '../license.js';
+import { install, installEvents } from '../install.js';
 
 const ACCENTS = { blue: '#2f6fdb', teal: '#0f8f86', violet: '#7a5af5', green: '#2e8b57', orange: '#d9730d', rose: '#d6336c', graphite: '#4b5563' };
 
@@ -33,7 +34,8 @@ export function openSettings(initialTab = 'general') {
     ['about', 'info', t('settings.about')],
   ];
   const renderNav = () => { clear(nav); for (const [id, ic, label] of tabs) nav.appendChild(h('button', { class: id === tab ? 'on' : '', onclick: () => { tab = id; renderNav(); renderPane(); } }, icon(ic, { size: 18 }), label)); };
-  const renderPane = () => { clear(pane); ({ general, naming, account, backup, storage, license: licensePane, about })[tab](pane); };
+  let paneCleanup = null; // unsubscribe function of the pane currently shown
+  const renderPane = () => { paneCleanup?.(); paneCleanup = null; clear(pane); ({ general, naming, account, backup, storage, license: licensePane, about })[tab](pane); };
 
   const general = (p) => {
     p.appendChild(h('h3', { text: t('settings.general') }));
@@ -55,6 +57,33 @@ export function openSettings(initialTab = 'general') {
     const densSeg = h('div', { class: 'seg' });
     for (const v of ['small', 'medium', 'large']) densSeg.appendChild(h('button', { class: dens === v ? 'on' : '', onclick: () => { store.setSetting('density', v); app.applyTheme(); renderPane(); } }, t('settings.density.' + v)));
     p.appendChild(h('div', { class: 'field' }, h('label', { text: t('settings.density') }), densSeg));
+
+    // ---- install as an app ----
+    p.appendChild(h('h4', { text: t('install.title') }));
+    const box = h('div', { class: 'card-box' });
+    const renderInstall = () => {
+      clear(box);
+      if (install.isStandalone() || install.isInstalled()) {
+        box.appendChild(h('div', { class: 'row' }, icon('check-circle', { size: 20 }), h('div', { class: 'grow' }, h('div', { style: { fontWeight: 600 }, text: t('install.installed') }), h('div', { class: 'muted small', text: t('install.installedHint') }))));
+      } else if (install.canPrompt()) {
+        box.appendChild(h('p', { class: 'muted small', style: { margin: '0 0 10px' }, text: t('install.desc') }));
+        const btn = h('button', { class: 'btn primary', onclick: async () => {
+          btn.disabled = true;
+          const r = await install.prompt();
+          if (r === 'accepted') toast(t('install.done'), { type: 'success', duration: 6000 });
+          renderInstall();
+        } }, icon('download', { size: 16 }), t('install.button'));
+        box.appendChild(btn);
+      } else if (install.isSupported()) {
+        box.appendChild(h('p', { class: 'muted small', style: { margin: '0 0 8px' }, text: t('install.desc') }));
+        box.appendChild(h('div', { class: 'row small' }, icon('info', { size: 16 }), h('span', { class: 'muted', text: t(install.isEdge() ? 'install.manualEdge' : 'install.manualChrome') })));
+      } else {
+        box.appendChild(h('div', { class: 'row small' }, icon('alert', { size: 16 }), h('span', { class: 'muted', text: t('install.unsupported') })));
+      }
+    };
+    renderInstall();
+    paneCleanup = installEvents.on('change', renderInstall);
+    p.appendChild(box);
   };
 
   const naming = (p) => {
@@ -178,6 +207,6 @@ export function openSettings(initialTab = 'general') {
   };
 
   renderNav(); renderPane();
-  const dlg = openDialog({ title: t('settings.title'), icon: 'settings', size: 'lg', body: h('div', { class: 'settings-layout' }, nav, pane) });
+  const dlg = openDialog({ title: t('settings.title'), icon: 'settings', size: 'lg', body: h('div', { class: 'settings-layout' }, nav, pane), onClose: () => { paneCleanup?.(); paneCleanup = null; } });
   return dlg;
 }

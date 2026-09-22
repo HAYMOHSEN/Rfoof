@@ -7,6 +7,8 @@ import { makeDropTarget, makeDragSource } from './dnd.js';
 import { db } from '../db.js';
 import { app } from '../app.js';
 import { license, licenseEvents } from '../license.js';
+import { install, installEvents } from '../install.js';
+import { toast } from './toast.js';
 
 export class Sidebar {
   constructor(el) {
@@ -15,6 +17,8 @@ export class Sidebar {
     this.render = this.render.bind(this);
     this.unsubs = ['folders', 'files', 'nav', 'ready'].map(ev => store.on(ev, () => this.schedule()));
     this.unsubs.push(store.on('settings', (k) => { if (k === 'expanded' || k === 'licensed' || k === 'trialImports') this.schedule(); }));
+    this.unsubs.push(licenseEvents.on('change', () => this.schedule()));
+    this.unsubs.push(installEvents.on('change', () => this.schedule()));
     this.render();
   }
   destroy() { this.unsubs.forEach(u => u()); this.unsubs = []; }
@@ -97,8 +101,16 @@ export class Sidebar {
       el.appendChild(ksec);
     }
 
-    // ---- footer: trial badge + storage ----
+    // ---- footer: install button + trial badge + storage ----
     const foot = h('div', { class: 'sidebar-footer' });
+    if (install.canPrompt()) {
+      foot.appendChild(h('button', { class: 'install-badge', title: t('install.hint'), onclick: async (e) => {
+        e.currentTarget.disabled = true;
+        const r = await install.prompt();
+        if (r === 'accepted') toast(t('install.done'), { type: 'success', duration: 6000 });
+        this.schedule();
+      } }, icon('download', { size: 16 }), h('span', { class: 'grow ellipsis', text: t('install.button') })));
+    }
     if (license.isTrial()) {
       foot.appendChild(h('button', { class: 'trial-badge', onclick: () => app.openSettings('license') },
         h('span', { class: 'row' }, icon('sparkles', { size: 16 }), h('span', { class: 'grow ellipsis', text: t('license.trialBadge', { n: fmtNum(license.remaining()) }) })),

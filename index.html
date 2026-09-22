@@ -26,6 +26,8 @@
         var dark = th === 'dark' || (th !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
         document.documentElement.dataset.theme = dark ? 'dark' : 'light';
       } catch (e) {}
+      // Keep the browser's "install app" offer until the app is ready to show its own Install button
+      window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.__rfoofInstallPrompt = e; }, { once: true });
     })();
   </script>
 </head>

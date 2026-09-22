@@ -22,12 +22,14 @@ import { openSettings } from './ui/settings.js';
 import { openWelcome } from './ui/welcome.js';
 import { indexer, importEvents } from './import.js';
 import { license } from './license.js';
+import { initInstall, install } from './install.js';
 
 export const app = {
   sync: null, photoUrl: '', els: {}, prevView: null,
 
   // ---------------- boot ----------------
   async boot() {
+    initInstall();
     setLang(detectLang(), { silent: true });
     this.renderSplash();
     // auth redirect must be handled before anything else
@@ -317,5 +319,5 @@ export const app = {
   },
 };
 
-window.rfoof = app; app.store = store; app.license = license;
+window.rfoof = app; app.store = store; app.license = license; app.install = install;
 app.boot().catch(e => { console.error(e); document.body.innerHTML = `<div class="empty-state" style="height:100%;justify-content:center"><h3>Rfoof could not start</h3><p>${(e && e.message) || e}</p></div>`; });

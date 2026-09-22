@@ -5,13 +5,13 @@
 export const APP = {
   name: 'Rfoof',
   nameAr: 'رفوف',
-  version: '1.0.0',
+  version: '1.0.1',
 
   // ---- Microsoft account + OneDrive -------------------------
   // 1. Go to https://entra.microsoft.com  → Applications → App registrations → New registration
   // 2. Supported account types: "Personal Microsoft accounts and any organizational directory"
   // 3. Platform: "Single-page application", Redirect URI = the exact URL where this app is hosted,
-  //    e.g. https://YOUR-USER.github.io/rfoof/   (keep the trailing slash)
+  //    e.g. https://YOUR-USER.github.io/Rfoof/   (keep the trailing slash)
   // 4. API permissions (delegated): User.Read, Files.ReadWrite.AppFolder, offline_access
   // 5. Copy "Application (client) ID" below.
   msClientId: '',
