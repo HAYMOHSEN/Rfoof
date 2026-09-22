@@ -23,7 +23,9 @@
   "screenshots": [
     { "src": "screenshots/library-light.png", "sizes": "1600x1000", "type": "image/png", "form_factor": "wide", "label": "Library with colorful folders" },
     { "src": "screenshots/library-dark-ar.png", "sizes": "1600x1000", "type": "image/png", "form_factor": "wide", "label": "Arabic interface in dark mode" },
-    { "src": "screenshots/viewer.png", "sizes": "1600x1000", "type": "image/png", "form_factor": "wide", "label": "Built-in file viewer" }
+    { "src": "screenshots/viewer.png", "sizes": "1600x1000", "type": "image/png", "form_factor": "wide", "label": "Built-in file viewer" },
+    { "src": "screenshots/search.png", "sizes": "1600x1000", "type": "image/png", "form_factor": "wide", "label": "Search inside file contents" },
+    { "src": "screenshots/backup.png", "sizes": "1600x1000", "type": "image/png", "form_factor": "wide", "label": "Back up to any folder or cloud drive" }
   ],
   "shortcuts": [
     { "name": "Add files", "short_name": "Add", "url": "./?action=import", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
