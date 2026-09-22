@@ -97,9 +97,6 @@ export class DetailsPanel {
       h('button', { class: 'icon-btn', title: t('action.download'), onclick: () => actions.download(f.id) }, icon('download', { size: 18 })),
       h('button', { class: 'icon-btn', title: t('action.move'), onclick: () => actions.move([f.id]) }, icon('folder-input', { size: 18 })),
       h('button', { class: 'icon-btn', title: t('action.more'), onclick: (e) => actions.fileMenu([f.id], { anchor: e.currentTarget }) }, icon('more-h', { size: 18 }))));
-    // sync pill
-    const syncLabel = !f.hasBlob ? ['cloud', 'warn', t('details.sync.cloud')] : f.syncState === 'synced' ? ['cloud-check', 'ok', t('details.sync.synced')] : f.syncState === 'error' ? ['alert', 'err', t('details.sync.error')] : (app.sync ? ['cloud-upload', 'warn', t('details.sync.pending')] : ['laptop', '', t('details.sync.local')]);
-    body.appendChild(h('div', { style: { marginBottom: '10px' } }, h('span', { class: `sync-pill ${syncLabel[1]}` }, icon(syncLabel[0], { size: 14 }), syncLabel[2])));
     // tags / color / notes
     body.appendChild(h('div', { class: 'field' }, h('label', { text: t('label.tags') }), tagEditor(f.tags, (tags) => store.updateFile(f.id, { tags }))));
     body.appendChild(h('div', { class: 'field' }, h('label', { text: t('label.color') }), colorPicker(f.color, (c) => store.updateFile(f.id, { color: c }))));

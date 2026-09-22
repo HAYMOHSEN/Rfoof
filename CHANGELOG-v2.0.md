@@ -1,0 +1,30 @@
+# Rfoof 2.0.0 — offline-first, backup anywhere
+
+OneDrive sync and the Microsoft sign-in are gone. Nothing to register in Entra, no client ID, no account. The library stays on the device and is backed up, on demand, into any folder the user picks.
+
+## New: Settings ▸ Backup
+
+- **Backup folder** (Edge / Chrome, incl. the Store app): pick any folder once — local disk, USB stick, or the sync folder of Google Drive / Dropbox / OneDrive / iCloud. Rfoof writes `Library/<Folder>/<Sub>/<Title>.<ext>`, `Trash/…`, `rfoof-index.json` (titles, tags, colors, notes) and `README.txt`. The folder is remembered (**Back up now**), repeated backups copy only new files, and nothing in the folder is ever deleted.
+- **Restore from folder**: pick a backup folder on any device. Existing files are skipped, folders with the same name under the same parent are merged (no duplicate starter folders).
+- **ZIP** export / restore kept for every browser, with the identical layout (a ZIP can be unzipped into a backup folder and vice-versa).
+- Backup file names are unique case-insensitively (safe on Windows / macOS drives).
+
+## Removed
+
+- `js/auth.js`, `js/graph.js`, `js/sync.js`, `test/sync.test.js` and all OAuth / Microsoft Graph code.
+- `msClientId`, `msAuthority`, `msScopes`, `msFallbackScopes`, `cloudFolderName` from `js/config.js`.
+- Settings ▸ *Account & OneDrive* tab, the cloud/sync button and account avatar in the top bar, the sync command in the Ctrl+K palette, the sign-in button on the welcome screen, the OneDrive PDF conversion for legacy Office files, and the per-file sync pill in the details panel.
+- The pending-changes queue in IndexedDB (no longer written; leftovers from 1.x are cleared on first start).
+
+## Changed
+
+- `js/backup.js` rewritten (folder + ZIP, shared index format, shared restore logic).
+- `js/ui/settings.js`: new Backup pane; `js/app.js`, `js/store.js`, `js/ui/actions.js`, `js/ui/details.js`, `js/ui/palette.js`, `js/ui/welcome.js` simplified.
+- `js/i18n.js`: new `backup.*` strings (EN + AR); OneDrive wording removed from welcome, trial and wipe texts.
+- `sw.js` precache list and `VERSION` = 2.0.0; `config.js` version = 2.0.0; `manifest.webmanifest`, `index.html` descriptions.
+- `privacy.html` (EN + AR): the OneDrive section replaced by a "Backup folder" section.
+- `README.md` / `README.ar.md`: Entra setup removed; backup instructions, Store listing text and known limits updated.
+
+## Upgrading from 1.x
+
+Just upload the new files over the old ones. Libraries already stored on a device are kept; the old `auth.js` / `graph.js` / `sync.js` can be deleted from the repository (they are no longer referenced). Anyone who had files only in OneDrive can find them in `OneDrive/Apps/Rfoof`, organized in the same folders, and drag them into the app again.

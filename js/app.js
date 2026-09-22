@@ -9,7 +9,6 @@ import { db } from './db.js';
 import { icon } from './icons.js';
 import { LOGO_SVG } from './logo.js';
 import { search } from './search.js';
-import { auth, authEvents } from './auth.js';
 import { toast } from './ui/toast.js';
 import { closeTopDialog, topDialog } from './ui/dialog.js';
 import { isMenuOpen, showMenu } from './ui/menu.js';
@@ -25,16 +24,13 @@ import { license } from './license.js';
 import { initInstall, install } from './install.js';
 
 export const app = {
-  sync: null, photoUrl: '', els: {}, prevView: null,
+  els: {}, prevView: null,
 
   // ---------------- boot ----------------
   async boot() {
     initInstall();
     setLang(detectLang(), { silent: true });
     this.renderSplash();
-    // auth redirect must be handled before anything else
-    let justSignedIn = null; let authError = null;
-    if (auth.isConfigured()) { try { justSignedIn = await auth.handleRedirect(); } catch (e) { authError = e; } }
     await db.persist();
     await store.init();
     if (!store.settings.deviceId) await store.setSetting('deviceId', uid());
@@ -45,8 +41,6 @@ export const app = {
     if (!store.settings.welcomeDone) await openWelcome();
     this.registerSW();
     this.setupGlobal();
-    await this.setupSync(justSignedIn);
-    if (authError) toast(t('auth.failed', { msg: authError.message }), { type: 'error', duration: 8000 });
     if (storeLaunch && !wasLicensed) toast(t('license.activated'), { type: 'success', duration: 6000 });
     // resume background indexing for anything not yet indexed
     const pending = Array.from(store.files.values()).filter(f => !f.deletedAt && f.hasBlob && (!f.indexed || !f.thumb)).map(f => f.id);
@@ -89,18 +83,14 @@ export const app = {
     els.searchClear = h('button', { class: 'clear', hidden: true, 'aria-label': t('action.clear'), onclick: () => { els.search.value = ''; this.runSearch(''); els.search.focus(); } }, icon('x', { size: 16 }));
     els.search.addEventListener('input', debounce(() => this.runSearch(els.search.value), 160));
     els.search.addEventListener('keydown', (e) => { if (e.key === 'Escape') { els.search.value = ''; this.runSearch(''); els.search.blur(); } if (e.key === 'Enter') this.runSearch(els.search.value, true); });
-    els.syncBtn = h('button', { class: 'icon-btn sync-btn', title: t('action.sync'), onclick: (e) => this.syncMenu(e.currentTarget) }, icon('cloud'));
-    els.accountBtn = h('button', { class: 'icon-btn', title: t('settings.account'), onclick: () => this.openSettings('account') }, h('span', { class: 'avatar', style: { width: '28px', height: '28px', fontSize: '12px' } }, icon('user', { size: 16 })));
     const top = h('header', { class: 'topbar' },
       h('button', { class: 'icon-btn', title: t('nav.folders'), 'aria-label': t('nav.folders'), onclick: () => this.toggleSidebar() }, icon('menu')),
       h('div', { class: 'brand' }, h('span', { class: 'logo', html: LOGO_SVG }), h('span', { text: t('app.name') })),
       h('div', { class: 'searchbox' }, icon('search', { size: 18 }), els.search, els.searchClear),
       h('div', { class: 'topbar-actions' },
         h('button', { class: 'btn primary', onclick: () => actions.import([]) }, icon('plus', { size: 18 }), h('span', { text: t('action.import') })),
-        els.syncBtn,
         h('button', { class: 'icon-btn', title: t('action.details') + ' (Ctrl+D)', onclick: () => this.setDetails() }, icon('panel-right')),
-        h('button', { class: 'icon-btn', title: t('settings.title'), onclick: () => this.openSettings() }, icon('settings')),
-        els.accountBtn));
+        h('button', { class: 'icon-btn', title: t('settings.title'), onclick: () => this.openSettings() }, icon('settings'))));
     els.sidebar = h('aside', { class: 'sidebar', id: 'sidebar' });
     els.toolbar = h('div', { class: 'toolbar' });
     els.content = h('div', { class: 'content', id: 'content' });
@@ -114,8 +104,6 @@ export const app = {
     this.sidebar = new Sidebar(els.sidebar);
     this.contentView = new ContentView(els.toolbar, els.content, els.bulk);
     this.detailsPanel = new DetailsPanel(els.details);
-    this.updateSyncBadge();
-    this.updateAccountBtn();
     if (window.innerWidth <= 760) { els.app.classList.add('sidebar-collapsed'); els.app.classList.add('details-collapsed'); }
     if (window.innerWidth <= 1100 && window.innerWidth > 760) els.app.classList.add('details-collapsed');
     if (els.dropOverlay) document.body.appendChild(els.dropOverlay);
@@ -170,14 +158,12 @@ export const app = {
       if (mod && e.key === ',') { e.preventDefault(); this.openSettings(); return; }
       if (e.key === 'Escape' && !inInput && !topDialog() && !isMenuOpen() && !document.querySelector('.viewer')) store.clearSelection();
     });
-    window.addEventListener('online', () => { toast(t('toast.online'), { type: 'success', duration: 2000 }); this.updateSyncBadge(); if (this.sync && store.settings.autoSync !== false) this.sync.sync({ reason: 'online' }); });
-    window.addEventListener('offline', () => { toast(t('toast.offline'), { duration: 4000 }); this.updateSyncBadge(); });
+    window.addEventListener('online', () => { toast(t('toast.online'), { type: 'success', duration: 2000 }); });
+    window.addEventListener('offline', () => { toast(t('toast.offline'), { duration: 4000 }); });
     matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => this.applyTheme());
     window.addEventListener('resize', debounce(() => { if (window.innerWidth > 760) this.els.scrim.hidden = true; }, 100));
     i18nEvents.on('change', () => { document.title = t('app.name'); });
     document.title = t('app.name');
-    importEvents.on('progress', () => this.updateSyncBadge());
-    store.on('queue', () => { this.updateSyncBadge(); this.scheduleAutoSync(); });
     // keep search box in sync with view
     store.on('nav', (v) => { const els = this.els; if (v.type !== 'search' && els.search?.value) { els.search.value = ''; els.searchClear.hidden = true; } });
     // global drop overlay for external files (registered once)
@@ -221,100 +207,10 @@ export const app = {
     });
   },
 
-  // ---------------- sync / account ----------------
-  async setupSync(justSignedIn) {
-    if (!auth.isConfigured()) { this.updateSyncBadge(); return; }
-    const { GraphClient } = await import('./graph.js');
-    const { SyncEngine } = await import('./sync.js');
-    this.sync = new SyncEngine(store, new GraphClient(), { auth, indexer });
-    this.sync.on('status', () => this.updateSyncBadge());
-    authEvents.on('expired', () => { toast(t('auth.expired'), { type: 'error', duration: 8000 }); this.updateAccountBtn(); this.updateSyncBadge(); });
-    if (justSignedIn) {
-      const prev = store.settings.account;
-      if (prev && prev.id && prev.id !== justSignedIn.id) await this.sync.resetRemoteState();
-      await store.setSetting('account', justSignedIn);
-      toast(t('toast.signedIn', { name: justSignedIn.name || justSignedIn.username }), { type: 'success' });
-    }
-    this.updateAccountBtn();
-    this.loadPhoto();
-    if (auth.isSignedIn()) {
-      if (store.settings.autoSync !== false) this.sync.sync({ reason: 'startup' });
-      // periodic pull while the app is open
-      setInterval(() => { if (document.visibilityState === 'visible' && store.settings.autoSync !== false) this.sync.sync({ reason: 'periodic' }); }, 5 * 60 * 1000);
-      document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && store.settings.autoSync !== false && Date.now() - (store.settings.lastSync || 0) > 60000) this.sync.sync({ reason: 'visible' }); });
-    }
-    this.updateSyncBadge();
-  },
-  scheduleAutoSync: debounce(function () { if (app.sync && auth.isSignedIn() && store.settings.autoSync !== false && isOnline()) app.sync.sync({ reason: 'change' }); }, 2500),
-  async loadPhoto() {
-    if (!this.sync || !auth.isSignedIn()) return;
-    try { const b = await this.sync.graph.photo(); if (b) { this.photoUrl = URL.createObjectURL(b); this.updateAccountBtn(); } } catch { /* ignore */ }
-  },
-  async signIn() {
-    if (!auth.isConfigured()) return toast(t('settings.notConfigured'), { type: 'error' });
-    toast(t('auth.redirecting'));
-    try { await auth.signIn(); } catch (e) { toast(t('auth.failed', { msg: e.message }), { type: 'error' }); }
-  },
-  async signOut() {
-    auth.signOut();
-    this.photoUrl = '';
-    this.updateAccountBtn(); this.updateSyncBadge();
-    toast(t('toast.signedOut'));
-  },
-  async syncNow() {
-    if (!this.sync) return toast(t('settings.notConfigured'), { type: 'error' });
-    if (!auth.isSignedIn()) return this.signIn();
-    if (!isOnline()) return toast(t('toast.needOnline'), { type: 'error' });
-    const ok = await this.sync.sync({ reason: 'manual' });
-    if (ok) toast(t('toast.syncDone'), { type: 'success' });
-    else if (this.sync.status.state === 'error') toast(t('toast.syncError', { msg: this.sync.status.message }), { type: 'error', duration: 8000 });
-  },
-  syncMenu(anchor) {
-    {
-      const st = this.sync?.status || { state: 'notConfigured' };
-      const signed = auth.isSignedIn();
-      const label = !auth.isConfigured() ? t('sync.notConfigured') : !signed ? t('sync.signedOut') : !isOnline() ? t('sync.offline') : st.state === 'syncing' ? t('sync.syncing') : st.state === 'error' ? `${t('sync.error')}: ${st.message}` : store.pendingCount ? t('sync.pending', { n: store.pendingCount }) : t('sync.idle');
-      const items = [{ header: label }];
-      if (auth.isConfigured()) {
-        if (signed) { items.push({ label: t('action.sync'), icon: 'refresh', onClick: () => this.syncNow() }); items.push({ label: t('settings.account'), icon: 'user', onClick: () => this.openSettings('account') }); }
-        else items.push({ label: t('action.signIn'), icon: 'log-in', onClick: () => this.signIn() });
-      } else items.push({ label: t('settings.account'), icon: 'info', onClick: () => this.openSettings('account') });
-      items.push({ label: t('action.export'), icon: 'archive', onClick: () => this.openSettings('backup') });
-      showMenu(items, { anchor, align: 'end' });
-    }
-  },
-  updateSyncBadge() {
-    const b = this.els.syncBtn; if (!b) return;
-    clear(b);
-    const st = this.sync?.status || { state: 'idle' };
-    let ic = 'cloud', badge = '';
-    if (!auth.isConfigured() || !auth.isSignedIn()) { ic = 'cloud-off'; }
-    else if (!isOnline()) { ic = 'cloud-off'; badge = 'warn'; }
-    else if (st.state === 'syncing') { ic = 'cloud-upload'; badge = 'busy'; }
-    else if (st.state === 'error' || st.state === 'signedOut') { ic = 'cloud'; badge = ''; b.title = st.message || t('sync.error'); badge = 'err'; }
-    else if (store.pendingCount) { ic = 'cloud-upload'; badge = 'warn'; }
-    else { ic = 'cloud-check'; }
-    b.appendChild(icon(ic));
-    if (badge) b.appendChild(h('span', { class: `badge ${badge === 'err' ? '' : badge}` }));
-    b.title = st.state === 'syncing' ? t('sync.syncing') : (st.state === 'error' ? `${t('sync.error')}: ${st.message}` : (auth.isSignedIn() ? (store.pendingCount ? t('sync.pending', { n: store.pendingCount }) : t('sync.idle')) : t('sync.signedOut')));
-  },
-  updateAccountBtn() {
-    const b = this.els.accountBtn; if (!b) return;
-    const acc = auth.account();
-    clear(b);
-    const av = h('span', { class: 'avatar', style: { width: '28px', height: '28px', fontSize: '12px' } });
-    if (acc && this.photoUrl) av.appendChild(h('img', { src: this.photoUrl, alt: '' }));
-    else if (acc) av.textContent = (acc.name || acc.username || '?').trim()[0]?.toUpperCase() || '?';
-    else av.appendChild(icon('user', { size: 16 }));
-    b.appendChild(av);
-    b.title = acc ? `${acc.name} · ${acc.username}` : t('settings.account');
-  },
 
   async wipe() {
-    if (this.sync) { this.sync.rootId = ''; this.sync.trashId = ''; }
     for (const u of store.thumbUrls.values()) URL.revokeObjectURL(u);
     await db.wipe();
-    localStorage.removeItem('rfoof.auth');
     location.reload();
   },
 };

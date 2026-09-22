@@ -5,21 +5,12 @@
 export const APP = {
   name: 'Rfoof',
   nameAr: 'رفوف',
-  version: '1.0.1',
+  version: '2.0.0',
 
-  // ---- Microsoft account + OneDrive -------------------------
-  // 1. Go to https://entra.microsoft.com  → Applications → App registrations → New registration
-  // 2. Supported account types: "Personal Microsoft accounts and any organizational directory"
-  // 3. Platform: "Single-page application", Redirect URI = the exact URL where this app is hosted,
-  //    e.g. https://YOUR-USER.github.io/Rfoof/   (keep the trailing slash)
-  // 4. API permissions (delegated): User.Read, Files.ReadWrite.AppFolder, offline_access
-  // 5. Copy "Application (client) ID" below.
-  msClientId: '',
-  msAuthority: 'https://login.microsoftonline.com/common',
-  msScopes: ['openid', 'profile', 'offline_access', 'User.Read', 'Files.ReadWrite.AppFolder'],
-
-  // Name of the folder created inside the user's OneDrive (under "Apps/")
-  cloudFolderName: 'Rfoof',
+  // ---- Offline-first, no cloud sync required ----
+  // This version runs 100% locally. Users can export their library
+  // to any folder (local drive, cloud service, USB drive, etc.)
+  // for backup and portability.
 
   // Links shown in Settings → About
   website: '',

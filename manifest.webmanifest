@@ -2,7 +2,7 @@
   "id": "rfoof",
   "name": "Rfoof – Documents & Files Organizer",
   "short_name": "Rfoof",
-  "description": "Organize documents, photos and files in colorful folders. Works offline, searches inside files, backs up and syncs with OneDrive. English and Arabic.",
+  "description": "Organize documents, photos and files in colorful folders. Works 100% offline, searches inside files, backs up to any folder. No account needed. English and Arabic.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

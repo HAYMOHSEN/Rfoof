@@ -21,14 +21,14 @@
 
   <div class="card">
     <h2 style="margin-top:0">Summary</h2>
-    <p>Rfoof stores your files <strong>on your own device</strong> and, only if you choose to sign in, <strong>in your own OneDrive</strong>. The app has no servers of its own, does not collect analytics, does not show ads and never sends your documents anywhere else.</p>
+    <p>Rfoof stores your files <strong>on your own device</strong> and, only when you ask for a backup, <strong>in a folder you choose</strong>. The app has no servers of its own, needs no account, does not collect analytics, does not show ads and never sends your documents anywhere.</p>
   </div>
 
   <h2>What data does Rfoof handle?</h2>
   <p>Files, folders, titles, tags, notes and settings that you add to the app. They are stored locally in your browser/app storage (IndexedDB) on the device you use. Search indexes and thumbnails are generated on your device only.</p>
 
-  <h2>Microsoft account and OneDrive (optional)</h2>
-  <p>If you sign in with a Microsoft account, Rfoof asks for permission to read your basic profile (name and e-mail, to show who is signed in) and to read and write files <strong>only inside its own application folder</strong> in your OneDrive (<code>Apps/Rfoof</code>). Your library is uploaded there so you can back it up and open it from your other devices. Sign-in tokens are kept on your device. You can revoke access at any time from <a href="https://account.microsoft.com/privacy/app-access" target="_blank" rel="noopener">account.microsoft.com → Privacy → Apps and services</a>, and remove the folder from your OneDrive.</p>
+  <h2>Backup folder (optional)</h2>
+  <p>When you choose a backup folder in Settings → Backup, the browser asks you to confirm that Rfoof may read and write <strong>inside that folder only</strong>. Rfoof then copies your library into it (your files organized like your folders, plus an index file with titles, tags and notes) and remembers the folder so the next backup is one click. The folder can be on a local disk, a USB stick, or the sync folder of a cloud service you already use (for example Google Drive, Dropbox, OneDrive or iCloud); in that case the cloud service, not Rfoof, uploads the files under its own privacy policy. Rfoof never deletes anything from the folder, and you can forget the folder at any time from the same settings page or revoke the browser permission from the site's information panel.</p>
 
   <h2>What we do not do</h2>
   <ul>
@@ -38,7 +38,7 @@
   </ul>
 
   <h2>Your control</h2>
-  <p>You can export a full backup (ZIP) and delete all local data at any time from Settings. Uninstalling the app removes its local data from the device.</p>
+  <p>You can export a full backup (to a folder or as a ZIP file) and delete all local data at any time from Settings. Uninstalling the app removes its local data from the device.</p>
 
   <h2>Contact</h2>
   <p>Questions about privacy can be sent to the developer through the Microsoft Store listing page.</p>
@@ -50,12 +50,12 @@
     <p class="muted">آخر تحديث: سبتمبر 2026</p>
     <div class="card">
       <h2 style="margin-top:0">الخلاصة</h2>
-      <p>يحفظ تطبيق رفوف ملفاتك <strong>على جهازك</strong>، وإذا اخترت تسجيل الدخول فقط، <strong>في حساب OneDrive الخاص بك</strong>. لا يملك التطبيق أي خوادم خاصة به، ولا يجمع بيانات تحليلية، ولا يعرض إعلانات، ولا يرسل مستنداتك إلى أي جهة أخرى.</p>
+      <p>يحفظ تطبيق رفوف ملفاتك <strong>على جهازك</strong>، وعند طلبك نسخة احتياطية فقط، <strong>في مجلد تختاره أنت</strong>. لا يملك التطبيق أي خوادم خاصة به، ولا يحتاج إلى حساب، ولا يجمع بيانات تحليلية، ولا يعرض إعلانات، ولا يرسل مستنداتك إلى أي جهة.</p>
     </div>
     <h2>ما البيانات التي يتعامل معها التطبيق؟</h2>
     <p>الملفات والمجلدات والعناوين والوسوم والملاحظات والإعدادات التي تضيفها إلى التطبيق. تُخزَّن محليًا في مساحة تخزين التطبيق/المتصفح (IndexedDB) على الجهاز الذي تستخدمه. ويتم إنشاء فهارس البحث والصور المصغّرة على جهازك فقط.</p>
-    <h2>حساب Microsoft و OneDrive (اختياري)</h2>
-    <p>عند تسجيل الدخول بحساب Microsoft، يطلب التطبيق الإذن لقراءة ملفك الشخصي الأساسي (الاسم والبريد الإلكتروني لعرض الحساب المسجّل) ولقراءة وكتابة الملفات <strong>داخل مجلد التطبيق الخاص به فقط</strong> في OneDrive (<code>Apps/Rfoof</code>). تُرفع مكتبتك إلى هناك لتتمكن من حفظ نسخة احتياطية وفتحها من أجهزتك الأخرى. تُحفظ رموز تسجيل الدخول على جهازك. يمكنك إلغاء الوصول في أي وقت من صفحة <a href="https://account.microsoft.com/privacy/app-access" target="_blank" rel="noopener">account.microsoft.com ← الخصوصية ← التطبيقات والخدمات</a>، وحذف المجلد من OneDrive.</p>
+    <h2>مجلد النسخ الاحتياطي (اختياري)</h2>
+    <p>عندما تختار مجلدًا للنسخ الاحتياطي من الإعدادات ← النسخ الاحتياطي، يطلب المتصفح تأكيدك على السماح لرفوف بالقراءة والكتابة <strong>داخل ذلك المجلد فقط</strong>. ينسخ رفوف بعدها مكتبتك إليه (ملفاتك مرتّبة كما في مجلداتك، مع ملف فهرس يحوي العناوين والوسوم والملاحظات) ويتذكّر المجلد لتكون النسخة التالية بضغطة واحدة. يمكن أن يكون المجلد على قرص محلي أو ذاكرة USB أو مجلد مزامنة خدمة سحابية تستخدمها أصلًا (مثل Google Drive أو Dropbox أو OneDrive أو iCloud)؛ وفي هذه الحالة تتولى الخدمة السحابية، لا رفوف، رفع الملفات وفق سياسة الخصوصية الخاصة بها. لا يحذف رفوف أي شيء من المجلد أبدًا، ويمكنك نسيان المجلد في أي وقت من صفحة الإعدادات نفسها أو سحب إذن المتصفح من لوحة معلومات الموقع.</p>
     <h2>ما لا نقوم به</h2>
     <ul>
       <li>لا حسابات ولا خوادم يديرها المطوّر.</li>
@@ -63,7 +63,7 @@
       <li>لا بيع أو مشاركة للبيانات مع أي جهة.</li>
     </ul>
     <h2>تحكّمك بالبيانات</h2>
-    <p>يمكنك تصدير نسخة احتياطية كاملة (ZIP) وحذف جميع البيانات المحلية في أي وقت من الإعدادات. وإزالة التطبيق تحذف بياناته المحلية من الجهاز.</p>
+    <p>يمكنك تصدير نسخة احتياطية كاملة (إلى مجلد أو كملف ZIP) وحذف جميع البيانات المحلية في أي وقت من الإعدادات. وإزالة التطبيق تحذف بياناته المحلية من الجهاز.</p>
   </div>
 </body>
 </html>

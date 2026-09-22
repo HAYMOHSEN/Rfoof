@@ -31,8 +31,7 @@ export function openPalette(initial = '') {
     { label: t('settings.title'), icon: 'settings', run: () => app.openSettings() },
     { label: t('settings.theme') + ': ' + t('settings.theme.' + (store.settings.theme === 'dark' ? 'light' : 'dark')), icon: store.settings.theme === 'dark' ? 'sun' : 'moon', run: () => { store.setSetting('theme', store.settings.theme === 'dark' ? 'light' : 'dark'); app.applyTheme(); } },
     { label: t('settings.language') + ': ' + (document.documentElement.lang === 'ar' ? 'English' : 'العربية'), icon: 'globe', run: () => app.setLanguage(document.documentElement.lang === 'ar' ? 'en' : 'ar') },
-    { label: t('action.sync'), icon: 'refresh', run: () => app.syncNow() },
-    { label: t('action.export'), icon: 'archive', run: () => app.openSettings('backup') },
+    { label: t('settings.backup'), icon: 'archive', run: () => app.openSettings('backup') },
     { label: t('label.view') + ': ' + (store.settings.layout === 'grid' ? t('label.list') : t('label.grid')), icon: store.settings.layout === 'grid' ? 'list' : 'grid', run: () => store.setSetting('layout', store.settings.layout === 'grid' ? 'list' : 'grid') },
     { label: t('action.keyboard'), icon: 'keyboard', run: () => app.openSettings('about') },
   ];

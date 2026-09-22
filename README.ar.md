@@ -1,6 +1,6 @@
 # رفوف (Rfoof) — منظّم المستندات والملفات
 
-تطبيق ويب تقدّمي (PWA) احترافي لتنظيم المستندات والصور والملفات داخل مجلدات ملوّنة، يعمل بالكامل دون اتصال، يبحث داخل محتوى الملفات، ويحفظ نسخة احتياطية ويتزامن مع OneDrive بحيث تصل إلى مكتبتك من أي جهاز في العالم باسم مستخدم Microsoft وكلمة السر. الواجهة ثنائية اللغة (عربي/إنجليزي) مع دعم كامل للاتجاه من اليمين إلى اليسار.
+تطبيق ويب تقدّمي (PWA) احترافي لتنظيم المستندات والصور والملفات داخل مجلدات ملوّنة، يعمل بالكامل دون اتصال، يبحث داخل محتوى الملفات، ويحفظ نسخة احتياطية من مكتبتك في أي مجلد تختاره (قرص محلي، USB، أو مجلد أي خدمة سحابية) لتستعيدها على أي جهاز. لا يحتاج إلى أي حساب. الواجهة ثنائية اللغة (عربي/إنجليزي) مع دعم كامل للاتجاه من اليمين إلى اليسار.
 
 > النسخة الإنجليزية من هذا الدليل: [README.md](README.md)
 
@@ -13,10 +13,10 @@
 | **مجلدات ملوّنة** | 12 لونًا و40 أيقونة، مجلدات فرعية بلا حدود، سحب وإفلات للنقل، عدّادات الملفات |
 | **تسمية ذكية عند الإضافة** | نافذة تسمية لكل ملف مع نمط قابل للتخصيص `{name} {date} {time} {folder} {n} {year} {month} {day}`، اقتراحات تلقائية للعناوين (مثل `IMG_20240912_101530.jpg` ← `Photo 2024-09-12`)، وسوم ولون لكل الدفعة، وكشف الملفات المكررة |
 | **بحث فوري** | في العناوين والوسوم والملاحظات وأسماء المجلدات **وداخل محتوى** ملفات PDF و Word و Excel و PowerPoint والنصوص والأكواد، مع تطبيع عربي (الهمزات، التاء المربوطة، التشكيل، الأرقام الهندية) وإبراز النتائج |
-| **عارض مدمج** | صور (تكبير/تحريك/تدوير)، PDF (pdf.js مع بحث داخل المستند وتحديد النص)، فيديو وصوت، Markdown، أكواد ملوّنة، Word (docx)، Excel/CSV (جداول بأوراق متعددة)، PowerPoint (pptx)، أرشيفات ZIP. الملفات القديمة (doc/ppt/xls/odt…) تُعرض عبر تحويل OneDrive إلى PDF عند تسجيل الدخول |
-| **يعمل أوفلاين** | كل شيء محفوظ محليًا في IndexedDB مع Service Worker يحمّل التطبيق بلا إنترنت |
-| **OneDrive** | تسجيل دخول بحساب Microsoft (OAuth 2.0 PKCE بلا مكتبات خارجية)، رفع ومزامنة ثنائية الاتجاه، مجلدات حقيقية داخل `OneDrive/Apps/Rfoof` بنفس هيكل التطبيق، سلة محذوفات، تنزيل الملفات عند الطلب أو إبقاء الكل أوفلاين |
-| **نسخ احتياطي محلي** | تصدير المكتبة كاملة كملف ZIP منظّم واستعادتها |
+| **عارض مدمج** | صور (تكبير/تحريك/تدوير)، PDF (pdf.js مع بحث داخل المستند وتحديد النص)، فيديو وصوت، Markdown، أكواد ملوّنة، Word (docx)، Excel/CSV (جداول بأوراق متعددة)، PowerPoint (pptx)، أرشيفات ZIP |
+| **يعمل أوفلاين 100%** | كل شيء محفوظ محليًا في IndexedDB مع Service Worker يحمّل التطبيق بلا إنترنت. لا حساب ولا تسجيل دخول |
+| **نسخ احتياطي إلى أي مجلد** | اختر مجلدًا مرة واحدة (قرص محلي، ذاكرة USB، أو مجلد Google Drive / Dropbox / OneDrive / iCloud) وتُكتب فيه ملفاتك بنفس هيكل مجلداتك مع فهرس للعناوين والوسوم والملاحظات. النسخة التالية بضغطة واحدة وتنسخ الجديد فقط. الاستعادة من المجلد نفسه على أي جهاز |
+| **نسخ احتياطي ZIP** | يعمل في كل المتصفحات: تصدير المكتبة كاملة كملف ZIP بنفس الهيكل واستعادتها منه |
 | **سريع** | قوائم افتراضية (Virtualized) لآلاف الملفات، مصغّرات مخزّنة، فهرسة في الخلفية |
 | **احترافي** | مظهر فاتح/داكن/تلقائي، 7 ألوان رئيسية، لوحة أوامر Ctrl+K، اختصارات لوحة مفاتيح، قوائم سياقية، تصميم متجاوب للهاتف، دعم فتح الملفات من مستكشف Windows ("فتح باستخدام") |
 
@@ -33,22 +33,21 @@ rfoof/
 ├── licenses.html           تراخيص المكتبات مفتوحة المصدر
 ├── css/app.css             التصميم (فاتح/داكن، RTL)
 ├── js/
-│   ├── config.js           ← ضع هنا Client ID الخاص بـ Microsoft
+│   ├── config.js           إعدادات التطبيق والترخيص
 │   ├── app.js              تشغيل التطبيق والواجهة الرئيسية
 │   ├── i18n.js             النصوص العربية والإنجليزية
 │   ├── db.js / store.js    قاعدة البيانات المحلية وإدارة الحالة
 │   ├── search.js           البحث والتطبيع العربي
 │   ├── import.js           الإضافة والتسمية والمصغّرات وفهرسة المحتوى
 │   ├── office.js           قراءة docx/xlsx/pptx/zip
-│   ├── auth.js / graph.js / sync.js   تسجيل الدخول و Microsoft Graph والمزامنة
 │   ├── license.js          الترخيص: نسخة المتجر / التجربة / مفاتيح الترخيص
-│   ├── backup.js           النسخ الاحتياطي ZIP
+│   ├── backup.js           النسخ الاحتياطي إلى مجلد أو ZIP والاستعادة
 │   ├── ui/                 الشريط الجانبي، الشبكة، التفاصيل، النوافذ، الإعدادات…
 │   └── viewers/            عارض الملفات
 ├── vendor/                 pdf.js، JSZip، marked، highlight.js (نسخ محلية للعمل أوفلاين)
 ├── tools/license-key.html  مولّد مفاتيح الترخيص     ·  Rfoof-Desktop.bat  تشغيل محلي على Windows
 ├── icons/  screenshots/    أيقونات ولقطات شاشة جاهزة للمتجر
-└── test/                   اختبارات وحدة (node test/sync.test.js)
+└── test/                   اختبارات وحدة (node test/search.test.js و test/license.test.js)
 ```
 
 لا يوجد أي خطوة بناء (Build): ارفع الملفات كما هي.
@@ -57,7 +56,7 @@ rfoof/
 
 ## الخطوة 1 — النشر على GitHub Pages
 
-1. أنشئ مستودعًا جديدًا على GitHub باسم `rfoof` (عام Public).
+1. أنشئ مستودعًا جديدًا على GitHub باسم `Rfoof` (عام Public) — الاسم يصبح جزءًا من عنوان الموقع فالتزم بهذا الإملاء بالضبط.
 2. ارفع **كل محتويات** المجلد إليه (يمكن السحب والإفلات من صفحة المستودع ← *Add file ▸ Upload files*). تأكد أن `index.html` في جذر المستودع.
 3. من *Settings ▸ Pages*: المصدر **Deploy from a branch**، الفرع `main`، المجلد `/ (root)` ثم Save.
 4. بعد دقيقة يصبح التطبيق متاحًا على: `https://haymohsen.github.io/Rfoof/` (استبدل اسم المستخدم إذا كان مختلفًا). هذا العنوان هو ما ستستخدمه في كل الخطوات التالية — **بالشرطة المائلة في النهاية**.
@@ -66,36 +65,23 @@ rfoof/
 
 ---
 
-## الخطوة 2 — تفعيل تسجيل الدخول و OneDrive (Microsoft Entra)
+## الخطوة 2 — النسخ الاحتياطي (بلا حساب وبلا إعداد)
 
-هذه الخطوة مجانية وتستغرق 5 دقائق، وهي ما يتيح "الوصول من أي مكان باسم المستخدم وكلمة السر".
+يحتفظ رفوف بكل شيء على الجهاز. لا يوجد أي تسجيل أو إعداد مطلوب — النسخة الاحتياطية تكون حيث يريدها المستخدم. في التطبيق: **الإعدادات ← النسخ الاحتياطي**.
 
-1. افتح <https://entra.microsoft.com> وسجّل الدخول بحساب Microsoft (يمكن استخدام حساب outlook.com الشخصي؛ سيُنشأ لك دليل افتراضي تلقائيًا).
-2. من القائمة: **Identity ▸ Applications ▸ App registrations ▸ + New registration**.
-3. املأ:
-   - **Name**: `Rfoof`
-   - **Supported account types**: *Accounts in any organizational directory (Any Microsoft Entra ID tenant – Multitenant) and personal Microsoft accounts (e.g. Skype, Xbox)* — هذا الخيار ضروري ليعمل مع كل المستخدمين.
-   - **Redirect URI**: اختر المنصة **Single-page application (SPA)** وأدخل `https://haymohsen.github.io/Rfoof/`
-4. اضغط **Register**. في صفحة النظرة العامة انسخ **Application (client) ID** (يشبه `3f1a…-…`).
-5. من **API permissions ▸ + Add a permission ▸ Microsoft Graph ▸ Delegated permissions** أضف:
-   - `User.Read`
-   - `Files.ReadWrite.AppFolder`
-   - `offline_access`
-   
-   (لا حاجة لموافقة مسؤول Admin consent.)
-6. من **Authentication** تأكد أن العنوان مسجّل تحت *Single-page application* وليس *Web* (وإلا سيفشل تبادل الرمز بسبب CORS). يمكنك إضافة `http://localhost:8080/` أيضًا للتجربة المحلية.
-7. افتح ملف `js/config.js` وضع المعرّف:
-   ```js
-   msClientId: '3f1a....-....-....-....-............',
-   ```
-   ثم ارفع الملف إلى GitHub. (اختياريًا: من **Branding & properties** أضف شعار التطبيق `icons/icon-512.png` ورابط سياسة الخصوصية `https://haymohsen.github.io/Rfoof/privacy.html` ليظهرا في شاشة الموافقة.)
-8. افتح التطبيق ← الإعدادات ← *الحساب و OneDrive* ← **تسجيل الدخول بحساب Microsoft**. بعد الموافقة ستجد ملفاتك في `OneDrive ▸ Apps ▸ Rfoof` وستتزامن مع أي جهاز تسجّل الدخول منه (تطبيق المتجر، أو المتصفح على أي حاسوب أو هاتف عبر نفس الرابط).
+**مجلد النسخ الاحتياطي** (Microsoft Edge / Google Chrome، ومنها تطبيق المتجر)
+1. **اختر مجلدًا وانسخ الآن** ← اختر أي مجلد: قرص محلي، ذاكرة USB، أو مجلد المزامنة لخدمة سحابية مثبّتة على الجهاز أصلًا (Google Drive، Dropbox، OneDrive، iCloud …). يطلب المتصفح مرة واحدة السماح بالوصول إلى ذلك المجلد فقط.
+2. يكتب رفوف الملفات هناك بنفس هيكل مجلدات التطبيق (`Library/<المجلد>/<الفرعي>/<العنوان>.<الامتداد>`، والملفات المحذوفة تحت `Trash/`) مع ملف `rfoof-index.json` (العناوين والوسوم والألوان والملاحظات) وملف `README.txt`.
+3. يتذكّر التطبيق المجلد: في المرة التالية يكفي ضغطة على **نسخ احتياطي الآن**، وتُنسخ الملفات الجديدة فقط (الملف الموجود بنفس الاسم والحجم يُعدّ محدّثًا). لا يُحذف أي شيء من المجلد أبدًا.
+4. على جهاز آخر: **استعادة من مجلد** ← اختر المجلد نفسه (مثلًا عبر النسخة المتزامنة من الخدمة السحابية). الملفات الموجودة مسبقًا تُتخطّى، والمجلدات المتطابقة بالاسم تُدمج، فتكرار الاستعادة آمن.
 
-**كيف تعمل المزامنة؟** يُرفع كل ملف إلى مجلد OneDrive يطابق مجلده في التطبيق، ويُحفظ ملف `rfoof-index.json` يحتوي الوسوم والألوان والملاحظات والعناوين. عند تسجيل الدخول من جهاز جديد تُنزَّل القائمة فورًا وتُنزَّل الملفات نفسها عند فتحها (أو كلها إذا فعّلت "إبقاء جميع الملفات متاحة دون اتصال"). التعديلات من أجهزة مختلفة تُدمج بحسب الأحدث، والملفات المحذوفة تنتقل إلى `Apps/Rfoof/.Trash` حتى تُفرغ السلة.
+**ملف ZIP** (كل المتصفحات، ومنها Firefox والهواتف): **تصدير نسخة احتياطية (.zip)** ينزّل الهيكل نفسه في ملف واحد، و**استعادة نسخة احتياطية (.zip)** يعيده.
+
+الهيكلان متطابقان: يمكن فكّ ضغط ZIP داخل مجلد نسخ احتياطي، أو ضغط مجلد النسخ الاحتياطي في ZIP — وكلاهما يُستعاد.
 
 ---
 
-## الخطوة 3 — التغليف للمتجر عبر PWABuilder
+## الخطوة 3 — التغليف للمتجر عبر PWABuilder (اختياري)
 
 1. في **Partner Center** (<https://partner.microsoft.com/dashboard>) ← Apps and games ← **+ New product ▸ MSIX or PWA app** ← احجز الاسم `Rfoof` (أو `Rfoof – Documents Organizer` إن كان محجوزًا).
 2. من صفحة المنتج ← **Product management ▸ Product identity** انسخ القيم الثلاث: **Package/Identity/Name**، **Package/Identity/Publisher**، **Publisher display name**.
@@ -108,9 +94,9 @@ rfoof/
 
 ### نص جاهز لصفحة المتجر
 
-**الوصف القصير (EN):** Organize documents, photos and files in colorful folders. Works offline, searches inside files, and syncs with your OneDrive so your library is with you everywhere.
+**الوصف القصير (EN):** Organize documents, photos and files in colorful folders. Works offline, searches inside files, and backs up to any folder you choose — no account needed.
 
-**الوصف القصير (AR):** نظّم مستنداتك وصورك وملفاتك في مجلدات ملوّنة. يعمل دون اتصال، يبحث داخل الملفات، ويتزامن مع OneDrive لتكون مكتبتك معك في كل مكان.
+**الوصف القصير (AR):** نظّم مستنداتك وصورك وملفاتك في مجلدات ملوّنة. يعمل دون اتصال، يبحث داخل الملفات، ويحتفظ بنسخة احتياطية في أي مجلد تختاره — بدون حساب.
 
 **الوصف الكامل (EN):**
 Rfoof is a fast, private home for everything you keep: contracts, certificates, invoices, lecture notes, photos and more.
@@ -118,9 +104,9 @@ Rfoof is a fast, private home for everything you keep: contracts, certificates, 
 • Smart naming when you add files: patterns, suggestions, tags and color labels
 • Instant search across titles, tags, notes and the text inside PDF, Word, Excel, PowerPoint and text files — in Arabic and English
 • Built-in viewer for images, PDF, Office documents, spreadsheets, presentations, video, audio, code and ZIP archives
-• 100% offline — your files stay on your device
-• Optional OneDrive sync: sign in with your Microsoft account to back up your library and open it on any device
-• Local ZIP backup, light & dark themes, keyboard shortcuts, Arabic and English interface
+• 100% offline — your files stay on your device, no account required
+• Flexible backup: copy your library to any folder (local disk, USB, Google Drive, Dropbox, OneDrive or any cloud service) and restore it on any device
+• Light & dark themes, keyboard shortcuts, Arabic and English interface
 
 **الوصف الكامل (AR):**
 رفوف هو مكان سريع وخاص لكل ما تحتفظ به: عقود، شهادات، فواتير، ملاحظات محاضرات، صور وغيرها.
@@ -128,9 +114,9 @@ Rfoof is a fast, private home for everything you keep: contracts, certificates, 
 • تسمية ذكية عند الإضافة: أنماط واقتراحات ووسوم وألوان تمييز
 • بحث فوري في العناوين والوسوم والملاحظات وداخل نصوص PDF و Word و Excel و PowerPoint والملفات النصية — بالعربية والإنجليزية
 • عارض مدمج للصور و PDF ومستندات Office والجداول والعروض والفيديو والصوت والأكواد وأرشيفات ZIP
-• يعمل دون اتصال بنسبة 100% — ملفاتك تبقى على جهازك
-• مزامنة اختيارية مع OneDrive: سجّل الدخول بحساب Microsoft لحفظ نسخة احتياطية وفتح مكتبتك من أي جهاز
-• نسخ احتياطي محلي ZIP، مظهر فاتح وداكن، اختصارات لوحة مفاتيح، واجهة عربية وإنجليزية
+• يعمل دون اتصال بنسبة 100% — ملفاتك تبقى على جهازك، بلا حساب
+• نسخ احتياطي مرن: انسخ مكتبتك إلى أي مجلد (قرص محلي، USB، Google Drive، Dropbox، OneDrive أو أي خدمة سحابية) واستعدها على أي جهاز
+• مظهر فاتح وداكن، اختصارات لوحة مفاتيح، واجهة عربية وإنجليزية
 
 ---
 
@@ -189,9 +175,8 @@ Partner Center ← **Attract ▸ Promo codes ▸ Order codes**: حتى 1600 كو
 1. فكّ ضغط `rfoof.zip` في أي مكان (مثل `C:\Rfoof`).
 2. انقر نقرًا مزدوجًا على **`Rfoof-Desktop.bat`** — يشغّل خادمًا محليًا صغيرًا (`tools/serve.ps1`) ويفتح التطبيق في نافذة Edge مستقلة. أبقِ النافذة السوداء مفتوحة أثناء الاستخدام. هذه النسخة المحلية تعمل دائمًا كنسخة كاملة (نسخة المطوّر).
 3. إن ظهر تحذير SmartScreen اضغط *More info ▸ Run anyway* (السكربت محلي ولا يتصل بالإنترنت). لا يحتاج المشغّل صلاحيات مسؤول: يستخدم منفذ TCP عاديًا، وإن كان المنفذ 8080 مشغولًا يختار تلقائيًا المنفذ التالي المتاح ويطبعه في النافذة.
-4. لاستخدام OneDrive من هذه النسخة أضف `http://localhost:8080/` كـ Redirect URI من نوع SPA في تسجيل Entra.
 
-> ملاحظة: كل طريقة (الرابط، localhost، المتجر) لها مخزن بيانات مستقل في المتصفح؛ مزامنة OneDrive هي ما يوحّد مكتبتك بينها.
+> ملاحظة: كل طريقة (الرابط، localhost، المتجر) لها مخزن بيانات مستقل في المتصفح؛ انسخ احتياطيًا من إحداها واستعد في الأخرى لنقل مكتبتك بينها.
 
 ---
 
@@ -201,7 +186,6 @@ Partner Center ← **Attract ▸ Promo codes ▸ Order codes**: حتى 1600 كو
 cd rfoof
 python3 -m http.server 8080     # أو أي خادم ملفات ثابت
 # ثم افتح http://localhost:8080/
-node test/sync.test.js          # اختبارات محرّك المزامنة (12 اختبارًا)
 node test/search.test.js        # اختبارات البحث والتسمية
 node test/license.test.js       # اختبارات الترخيص والنسخة التجريبية
 ```
@@ -214,7 +198,7 @@ node test/license.test.js       # اختبارات الترخيص والنسخة
 
 | ماذا | أين |
 |---|---|
-| اسم التطبيق والإصدار ومعرّف Microsoft ومعرّف المتجر وحد النسخة التجريبية | `js/config.js` |
+| اسم التطبيق والإصدار ومعرّف المتجر وحد النسخة التجريبية | `js/config.js` |
 | النصوص العربية/الإنجليزية | `js/i18n.js` |
 | الألوان الرئيسية والمظهر | أعلى `css/app.css` (متغيرات `--accent` …) وقائمة `ACCENTS` في `js/ui/settings.js` |
 | ألوان المجلدات | `COLORS` في `js/store.js` |
@@ -228,9 +212,10 @@ node test/license.test.js       # اختبارات الترخيص والنسخة
 ## حدود معروفة
 
 - صور HEIC/TIFF تُحفظ وتُنزَّل لكن المتصفحات لا تعرضها.
-- معاينة Word/PowerPoint داخل التطبيق "مبسّطة" (نص، صور، جداول). للمعاينة الكاملة اضغط زر السحابة في العارض (يتطلب تسجيل الدخول واتصالًا) وسيحوّل OneDrive الملف إلى PDF.
+- معاينة Word/PowerPoint داخل التطبيق "مبسّطة" (نص، صور، جداول)؛ الصيغ القديمة (doc/ppt/xls/odt…) تُحفظ وتُنزَّل لكن لا تُعاين. افتح الملف في برنامجه للعرض الكامل.
 - ملفات PDF بخطوط CJK (صيني/ياباني) قد تحتاج مجلد `cmaps` من pdf.js — لم يُضمَّن لتقليل الحجم.
-- المزامنة تعتمد على مجلد التطبيق في OneDrive (`Apps/Rfoof`) فقط ولا تصل إلى بقية ملفات OneDrive — وهذا مقصود لأسباب الخصوصية.
+- النسخ الاحتياطي مباشرة إلى مجلد يحتاج File System Access API (Edge / Chrome على الحاسوب). Firefox و Safari والهواتف تستخدم نسخة ZIP.
+- النسخ الاحتياطي يتم عند الطلب (بضغطة) وليس مزامنة مستمرة ثنائية الاتجاه بين الأجهزة — الخدمة السحابية التي تنسخ إليها هي من تتولى النقل.
 
 ---
 

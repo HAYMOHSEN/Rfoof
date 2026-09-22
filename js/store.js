@@ -35,16 +35,18 @@ class Store extends Emitter {
 
   // ---------------- init ----------------
   async init() {
-    const [folders, files, settings, queue] = await Promise.all([
-      db.getAll('folders'), db.getAll('files'), db.getAll('settings'), db.count('queue'),
+    const [folders, files, settings] = await Promise.all([
+      db.getAll('folders'), db.getAll('files'), db.getAll('settings'),
     ]);
     for (const s of settings) this.settings[s.key] = s.value;
     for (const f of folders) this.folders.set(f.id, f);
     for (const f of files) { this._decorate(f); this.files.set(f.id, f); }
-    this.pendingCount = queue;
+    this.pendingCount = 0;
     this.ready = true;
     this.emit('ready');
     this._gcTombstones().catch(() => {});
+    // v1 kept a queue of pending cloud-sync operations; v2 has no cloud sync, drop any leftovers
+    db.clear('queue').catch(() => {});
   }
 
   _decorate(f) {
@@ -328,19 +330,13 @@ class Store extends Emitter {
     return m;
   }
 
-  // ---------------- sync queue ----------------
-  async enqueue(op) {
-    await db.put('queue', { ...op, ts: now() });
-    this.pendingCount = await db.count('queue');
-    this.emit('queue', this.pendingCount);
-  }
-  getQueue() { return db.getAll('queue'); }
-  async dequeue(seqs) {
-    await db.bulkDelete('queue', seqs);
-    this.pendingCount = await db.count('queue');
-    this.emit('queue', this.pendingCount);
-  }
-  async clearQueue() { await db.clear('queue'); this.pendingCount = 0; this.emit('queue', 0); }
+  // ---------------- change queue ----------------
+  // Kept as no-ops: v1 queued every change for OneDrive; v2 stores everything locally and
+  // backs up to a folder or ZIP on demand, so there is nothing to queue.
+  async enqueue() {}
+  getQueue() { return Promise.resolve([]); }
+  async dequeue() {}
+  async clearQueue() {}
 
   // ---------------- navigation & selection ----------------
   navigate(view) {

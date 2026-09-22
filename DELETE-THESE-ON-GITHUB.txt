@@ -1,0 +1,10 @@
+Rfoof 2.0.0 – files to DELETE from the GitHub repository (no longer used):
+
+  js/auth.js
+  js/graph.js
+  js/sync.js
+  test/sync.test.js      (only if the test folder exists in your repository)
+
+How: open the file on github.com → click the trash-can icon (Delete file) → Commit changes.
+
+Everything else in this ZIP is uploaded on top of the existing files (same names, same folders) and replaces them.

@@ -1,6 +1,6 @@
 # Rfoof (رفوف) — Documents & Files Organizer
 
-A professional Progressive Web App that organizes documents, photos and files in colorful folders, works fully offline, searches inside file contents, and backs up / syncs with OneDrive so the library is reachable from any device in the world with a Microsoft username and password. Bilingual interface (English / Arabic, full RTL).
+A professional Progressive Web App that organizes documents, photos and files in colorful folders, works 100% offline, searches inside file contents, and lets you export your library to any folder (local, cloud, USB) for backup and portability. Bilingual interface (English / Arabic, full RTL). No account required.
 
 > الدليل بالعربية: [README.ar.md](README.ar.md)
 
@@ -13,10 +13,10 @@ A professional Progressive Web App that organizes documents, photos and files in
 | **Colorful folders** | 12 colors, 40 icons, unlimited sub-folders, drag & drop, file counters |
 | **Smart naming on import** | Per-file title editing with a customizable pattern `{name} {date} {time} {folder} {n} {year} {month} {day}`, automatic title suggestions (`IMG_20240912_101530.jpg` → `Photo 2024-09-12`), batch tags & color labels, duplicate detection |
 | **Instant search** | Titles, tags, notes, folder names **and the text inside** PDF, Word, Excel, PowerPoint, text and code files. Arabic-aware normalization (hamza forms, taa marbuta, diacritics, Arabic-Indic digits) with highlighted results |
-| **Built-in viewer** | Images (zoom / pan / rotate), PDF (pdf.js with find & text selection), video & audio, Markdown, syntax-highlighted code, Word (docx), Excel / CSV (multi-sheet tables), PowerPoint (pptx), ZIP listings. Legacy Office formats (doc / ppt / xls / odt …) are previewed through OneDrive's PDF conversion when signed in |
-| **Offline first** | Everything lives in IndexedDB; a service worker loads the app without internet |
-| **OneDrive** | Microsoft sign-in (OAuth 2.0 + PKCE, no third-party library), two-way sync, real folders mirrored under `OneDrive/Apps/Rfoof`, cloud trash, download-on-demand or keep-everything-offline |
-| **Local backup** | Export the whole library as an organized ZIP and restore it |
+| **Built-in viewer** | Images (zoom / pan / rotate), PDF (pdf.js with find & text selection), video & audio, Markdown, syntax-highlighted code, Word (docx), Excel / CSV (multi-sheet tables), PowerPoint (pptx), ZIP listings |
+| **100% offline** | Everything lives in IndexedDB; a service worker loads the app without internet. No cloud account required. |
+| **Flexible backup** | Export your entire library to any folder you choose: local drive, USB, Google Drive, Dropbox, OneDrive, or any cloud service. Restore anytime with one click. |
+| **Portable** | Import from previous Rfoof ZIP backups or start fresh. Library merges intelligently, avoiding duplicates. |
 | **Fast** | Virtualized grid/list for thousands of files, cached thumbnails, background indexing |
 | **Polished** | Light / dark / system theme, 7 accent colors, Ctrl+K command palette, keyboard shortcuts, context menus, responsive phone layout, Windows "Open with" file handling |
 
@@ -33,22 +33,21 @@ rfoof/
 ├── licenses.html           open-source licenses
 ├── css/app.css             styles (light/dark, RTL)
 ├── js/
-│   ├── config.js           ← put your Microsoft client ID here
+│   ├── config.js           app settings, licensing config
 │   ├── app.js              bootstrap & shell
 │   ├── i18n.js             English / Arabic strings
 │   ├── db.js / store.js    IndexedDB + state
 │   ├── search.js           search & Arabic normalization
 │   ├── import.js           import, naming, thumbnails, content indexing
 │   ├── office.js           docx / xlsx / pptx / zip reading
-│   ├── auth.js / graph.js / sync.js   sign-in, Microsoft Graph, sync engine
 │   ├── license.js          licensing: Store edition / trial / license keys
-│   ├── backup.js           ZIP backup
+│   ├── backup.js           ZIP export / restore, folder export
 │   ├── ui/                 sidebar, grid, details, dialogs, settings …
 │   └── viewers/            file viewer
 ├── vendor/                 pdf.js, JSZip, marked, highlight.js (local copies → offline)
 ├── tools/license-key.html  license key generator   ·  Rfoof-Desktop.bat  local Windows launcher
 ├── icons/  screenshots/    Store-ready icons and screenshots
-└── test/                   unit tests (node test/sync.test.js)
+└── test/                   unit tests (node test/search.test.js, test/license.test.js)
 ```
 
 There is **no build step** — upload the files as they are.
@@ -57,7 +56,7 @@ There is **no build step** — upload the files as they are.
 
 ## Step 1 — Publish on GitHub Pages
 
-1. Create a new public repository on GitHub named `rfoof`.
+1. Create a new public repository on GitHub named `Rfoof` (the name becomes part of the site address, so keep exactly this spelling).
 2. Upload **all** contents of this folder (drag & drop on the repository page → *Add file ▸ Upload files*). `index.html` must be at the repository root.
 3. *Settings ▸ Pages*: Source **Deploy from a branch**, branch `main`, folder `/ (root)` → Save.
 4. After a minute the app is live at `https://haymohsen.github.io/Rfoof/` (replace the user name if different). Use this exact URL — **with the trailing slash** — in every step below.
@@ -66,31 +65,23 @@ Try it: add files, create folders, search, then go offline and reload — it mus
 
 ---
 
-## Step 2 — Enable Microsoft sign-in & OneDrive (Microsoft Entra)
+## Step 2 — Backup (no account, no setup)
 
-Free, about five minutes, and it is what makes "access from anywhere with username and password" work.
+Rfoof keeps everything on the device. There is nothing to register or configure — the backup lives wherever the user wants it. In the app: **Settings ▸ Backup**.
 
-1. Open <https://entra.microsoft.com> and sign in with a Microsoft account (a personal outlook.com account works; a default directory is created automatically).
-2. **Identity ▸ Applications ▸ App registrations ▸ + New registration**.
-3. Fill in:
-   - **Name**: `Rfoof`
-   - **Supported account types**: *Accounts in any organizational directory (Multitenant) and personal Microsoft accounts (e.g. Skype, Xbox)* — required so every user can sign in.
-   - **Redirect URI**: platform **Single-page application (SPA)**, value `https://haymohsen.github.io/Rfoof/`
-4. **Register**, then copy the **Application (client) ID** from the Overview page.
-5. **API permissions ▸ + Add a permission ▸ Microsoft Graph ▸ Delegated permissions**: add `User.Read`, `Files.ReadWrite.AppFolder`, `offline_access`. No admin consent is needed.
-6. **Authentication**: make sure the URI is listed under *Single-page application* (not *Web*), otherwise the token exchange fails because of CORS. You may also add `http://localhost:8080/` for local testing.
-7. Put the ID in `js/config.js` and upload the file:
-   ```js
-   msClientId: '3f1a....-....-....-....-............',
-   ```
-   Optional: under **Branding & properties** add the logo (`icons/icon-512.png`) and the privacy URL (`https://haymohsen.github.io/Rfoof/privacy.html`) so they appear on the consent screen.
-8. In the app: Settings ▸ *Account & OneDrive* ▸ **Sign in with Microsoft**. After consenting, the library appears in `OneDrive ▸ Apps ▸ Rfoof` and syncs with every device you sign in on (the Store app, or the same URL in any browser on any computer or phone).
+**Backup folder** (Microsoft Edge / Google Chrome, including the Store app)
+1. **Choose folder & back up** → pick any folder: a local disk, a USB stick, or the sync folder of a cloud service already installed on the PC (Google Drive, Dropbox, OneDrive, iCloud …). The browser asks once to allow access to that folder only.
+2. Rfoof writes the files there organized exactly like the app's folders (`Library/<Folder>/<Sub>/<Title>.<ext>`, trashed files under `Trash/`) plus `rfoof-index.json` (titles, tags, colors, notes) and a `README.txt`.
+3. The folder is remembered: next time it is one click on **Back up now**, and only new files are copied (a file with the same name and size is already up to date). Nothing is ever deleted from the folder.
+4. On another device: **Restore from folder** → pick the same folder (e.g. through the cloud service's synced copy). Files already present are skipped, folders with the same name are merged, so restoring repeatedly is safe.
 
-**How sync works.** Every file is uploaded into a OneDrive folder that mirrors its Rfoof folder, and `rfoof-index.json` stores titles, tags, colors and notes. A new device downloads the list immediately and fetches file bytes when a file is opened (or all of them with *Keep all files available offline*). Edits from different devices merge last-writer-wins; deleted files move to `Apps/Rfoof/.Trash` until the trash is emptied.
+**ZIP file** (every browser, including Firefox and phones): **Export backup (.zip)** downloads the same layout as one file; **Restore backup (.zip)** brings it back.
+
+Both layouts are identical, so a ZIP can be unzipped into a backup folder and a backup folder can be zipped — either restores.
 
 ---
 
-## Step 3 — Package for the Microsoft Store with PWABuilder
+## Step 3 — Package for the Microsoft Store (optional)
 
 1. In **Partner Center** (<https://partner.microsoft.com/dashboard>) → Apps and games → **+ New product ▸ MSIX or PWA app** → reserve the name `Rfoof` (or `Rfoof – Documents Organizer` if taken).
 2. On the product page → **Product management ▸ Product identity**: copy **Package/Identity/Name**, **Package/Identity/Publisher** and **Publisher display name**.
@@ -103,9 +94,9 @@ After publishing, any update you push to GitHub Pages reaches users automaticall
 
 ### Ready-to-paste Store listing
 
-**Short description (EN):** Organize documents, photos and files in colorful folders. Works offline, searches inside files, and syncs with your OneDrive so your library is with you everywhere.
+**Short description (EN):** Organize documents, photos and files in colorful folders. Works offline, searches inside files, and backs up to any folder you choose — no account needed.
 
-**Short description (AR):** نظّم مستنداتك وصورك وملفاتك في مجلدات ملوّنة. يعمل دون اتصال، يبحث داخل الملفات، ويتزامن مع OneDrive لتكون مكتبتك معك في كل مكان.
+**Short description (AR):** نظّم مستنداتك وصورك وملفاتك في مجلدات ملوّنة. يعمل دون اتصال، يبحث داخل الملفات، ويحتفظ بنسخة احتياطية في أي مجلد تختاره - بدون حساب.
 
 **Full description (EN):**
 Rfoof is a fast, private home for everything you keep: contracts, certificates, invoices, lecture notes, photos and more.
@@ -113,9 +104,9 @@ Rfoof is a fast, private home for everything you keep: contracts, certificates, 
 • Smart naming when you add files: patterns, suggestions, tags and color labels
 • Instant search across titles, tags, notes and the text inside PDF, Word, Excel, PowerPoint and text files — in Arabic and English
 • Built-in viewer for images, PDF, Office documents, spreadsheets, presentations, video, audio, code and ZIP archives
-• 100% offline — your files stay on your device
-• Optional OneDrive sync: sign in with your Microsoft account to back up your library and open it on any device
-• Local ZIP backup, light & dark themes, keyboard shortcuts, Arabic and English interface
+• 100% offline — your files stay on your device, no account required
+• Flexible backup: export your library to any folder (local, USB, Google Drive, Dropbox, OneDrive, or any cloud service)
+• Light & dark themes, keyboard shortcuts, Arabic and English interface
 
 (The Arabic full description is in `README.ar.md`.)
 
@@ -175,9 +166,8 @@ Partner Center → **Attract ▸ Promo codes ▸ Order codes**: up to 1,600 code
 1. Unzip `rfoof.zip` anywhere (e.g. `C:\Rfoof`).
 2. Double-click **`Rfoof-Desktop.bat`** — it starts a tiny local server (`tools/serve.ps1`) and opens the app in a standalone Edge window. Keep the black window open while you use the app. This local copy always runs as the full version (developer copy).
 3. If SmartScreen warns, click *More info ▸ Run anyway* (the script is local and makes no internet connections). No administrator rights are needed: the launcher uses a plain TCP socket, and if port 8080 is busy it automatically picks the next free port and prints it in the window.
-4. To use OneDrive from this copy, add `http://localhost:8080/` as an SPA redirect URI in the Entra registration.
 
-> Each way of opening the app (URL, localhost, Store) has its own browser data store; OneDrive sync is what unifies your library across them.
+> Each way of opening the app (URL, localhost, Store) has its own browser data store; back up from one and restore in the other to move your library across them.
 
 ---
 
@@ -187,7 +177,6 @@ Partner Center → **Attract ▸ Promo codes ▸ Order codes**: up to 1,600 code
 cd rfoof
 python3 -m http.server 8080     # any static file server works
 # open http://localhost:8080/
-node test/sync.test.js          # sync engine tests (12 scenarios against a mock OneDrive)
 node test/search.test.js        # search & naming tests
 node test/license.test.js       # licensing / trial tests
 ```
@@ -200,7 +189,7 @@ node test/license.test.js       # licensing / trial tests
 
 | What | Where |
 |---|---|
-| App name, version, Microsoft client ID, Store ID, trial limit | `js/config.js` |
+| App name, version, Store ID, trial limit | `js/config.js` |
 | English / Arabic strings | `js/i18n.js` |
 | Accent colors & theme tokens | top of `css/app.css` and `ACCENTS` in `js/ui/settings.js` |
 | Folder colors | `COLORS` in `js/store.js` |
@@ -214,9 +203,10 @@ node test/license.test.js       # licensing / trial tests
 ## Known limits
 
 - HEIC / TIFF images are stored and downloadable but browsers cannot display them.
-- Word / PowerPoint previews inside the app are "basic" (text, images, tables). For a pixel-perfect preview press the cloud button in the viewer (requires sign-in and internet); OneDrive converts the file to PDF.
+- Word / PowerPoint previews inside the app are "basic" (text, images, tables); legacy formats (doc / ppt / xls / odt …) are stored and downloadable but not previewed. Open the file in its own app for a full view.
 - PDFs with CJK fonts may need pdf.js's `cmaps` folder, which was left out to keep the download small.
-- Sync only touches the app folder in OneDrive (`Apps/Rfoof`) — by design, for privacy.
+- Backing up straight into a folder needs the File System Access API (Edge / Chrome on desktop). Firefox, Safari and phones use the ZIP backup.
+- Backup is on demand (a click), not a continuous two-way sync between devices — the cloud service you back up into handles the transport.
 
 ---
 

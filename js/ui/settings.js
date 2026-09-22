@@ -7,7 +7,7 @@ import { toast } from './toast.js';
 import { db } from '../db.js';
 import { APP } from '../config.js';
 import { app } from '../app.js';
-import { auth } from '../auth.js';
+import * as bk from '../backup.js';
 import { license, licenseEvents } from '../license.js';
 import { install, installEvents } from '../install.js';
 
@@ -27,7 +27,6 @@ export function openSettings(initialTab = 'general') {
   const tabs = [
     ['general', 'settings', t('settings.general')],
     ['naming', 'pencil', t('settings.naming')],
-    ['account', 'cloud', t('settings.account')],
     ['backup', 'archive', t('settings.backup')],
     ['storage', 'database', t('settings.storage')],
     ['license', 'key', t('license.title')],
@@ -35,7 +34,7 @@ export function openSettings(initialTab = 'general') {
   ];
   const renderNav = () => { clear(nav); for (const [id, ic, label] of tabs) nav.appendChild(h('button', { class: id === tab ? 'on' : '', onclick: () => { tab = id; renderNav(); renderPane(); } }, icon(ic, { size: 18 }), label)); };
   let paneCleanup = null; // unsubscribe function of the pane currently shown
-  const renderPane = () => { paneCleanup?.(); paneCleanup = null; clear(pane); ({ general, naming, account, backup, storage, license: licensePane, about })[tab](pane); };
+  const renderPane = () => { paneCleanup?.(); paneCleanup = null; clear(pane); ({ general, naming, backup, storage, license: licensePane, about })[tab](pane); };
 
   const general = (p) => {
     p.appendChild(h('h3', { text: t('settings.general') }));
@@ -93,58 +92,73 @@ export function openSettings(initialTab = 'general') {
     p.appendChild(switchRow(t('settings.askOnImport'), '', store.settings.askOnImport !== false, (v) => store.setSetting('askOnImport', v)));
   };
 
-  const account = (p) => {
-    p.appendChild(h('h3', { text: t('settings.account') }));
-    if (!auth.isConfigured()) {
-      p.appendChild(h('div', { class: 'card-box' }, h('div', { class: 'row' }, icon('alert', { size: 18 }), h('span', { text: t('settings.notConfigured') }))));
-      p.appendChild(h('p', { class: 'muted small', text: t('settings.syncDesc') }));
-      return;
-    }
-    const acc = auth.account();
-    if (acc) {
-      const av = h('span', { class: 'avatar lg', text: (acc.name || acc.username || '?').trim()[0]?.toUpperCase() || '?' });
-      if (app.photoUrl) { clear(av); av.appendChild(h('img', { src: app.photoUrl, alt: '' })); }
-      p.appendChild(h('div', { class: 'card-box account-card' }, av,
-        h('div', { class: 'grow' }, h('div', { style: { fontWeight: 600 }, text: acc.name || acc.username }), h('div', { class: 'muted small', text: acc.username })),
-        h('button', { class: 'btn sm', onclick: async () => { await app.signOut(); renderPane(); } }, icon('log-out', { size: 16 }), t('action.signOut'))));
-      p.appendChild(h('p', { class: 'muted small', text: t('settings.cloudFolder', { name: APP.cloudFolderName }) }));
-      p.appendChild(switchRow(t('settings.autoSync'), '', store.settings.autoSync !== false, (v) => store.setSetting('autoSync', v)));
-      p.appendChild(switchRow(t('settings.keepOffline'), '', !!store.settings.keepOffline, (v) => { store.setSetting('keepOffline', v); if (v) app.sync?.downloadAll(); }));
-      const last = store.settings.lastSync ? fmtDateTime(store.settings.lastSync) : t('settings.never');
-      p.appendChild(h('div', { class: 'row', style: { marginTop: '14px' } },
-        h('button', { class: 'btn primary', onclick: () => app.syncNow() }, icon('refresh', { size: 16 }), t('action.sync')),
-        h('span', { class: 'muted small', text: `${t('settings.lastSync')}: ${last}` })));
-    } else {
-      p.appendChild(h('div', { class: 'card-box' },
-        h('div', { style: { fontWeight: 600, marginBottom: '6px' }, text: t('auth.title') }),
-        h('p', { class: 'muted small', style: { margin: '0 0 12px' }, text: t('settings.syncDesc') }),
-        h('button', { class: 'btn primary', onclick: () => app.signIn() }, icon('microsoft', { size: 16 }), t('action.signIn'))));
-    }
-  };
-
   const backup = (p) => {
     p.appendChild(h('h3', { text: t('settings.backup') }));
     p.appendChild(h('p', { class: 'muted small', text: t('settings.backupDesc') }));
     const prog = h('div', { class: 'progress', style: { display: 'none', margin: '10px 0' } }, h('div'));
+    p.appendChild(prog);
+    const setProg = (n, total, pct) => { prog.firstChild.style.width = (pct != null ? pct : Math.round(n / Math.max(1, total) * 100)) + '%'; };
+    const showError = (err) => {
+      const known = { notBackup: 'backup.notBackup', permission: 'backup.permission', unsupported: 'backup.unsupported' }[err?.code];
+      if (known) return toast(t(known), { type: 'error', duration: 7000 });
+      console.error(err); toast(t('toast.error') + (err?.message ? ': ' + err.message : ''), { type: 'error', duration: 7000 });
+    };
+    // run a backup/restore job with the progress bar shown and the button disabled meanwhile
+    const run = async (btn, job) => {
+      if (btn) btn.disabled = true; prog.style.display = ''; setProg(0, 1);
+      try { await job(); } catch (err) { showError(err); }
+      if (btn) btn.disabled = false; prog.style.display = 'none';
+    };
+    // pick a folder while the click is still "fresh" (the browser only opens the picker right after a user gesture)
+    const pick = async () => { try { return await bk.pickBackupFolder(); } catch (err) { showError(err); return null; } };
+
+    // ---- backup folder (local disk, USB stick or the folder of any cloud drive) ----
+    p.appendChild(h('h4', { text: t('backup.folderTitle') }));
+    const box = h('div', { class: 'card-box' });
+    const backupTo = (btn, handle) => run(btn, async () => {
+      const r = await bk.exportToFolder(handle, setProg);
+      toast(t('toast.backupFolderDone', { name: r.name, written: r.written, skipped: r.skipped }), { type: 'success', duration: 7000 });
+      renderFolder();
+    });
+    const renderFolder = () => {
+      clear(box);
+      if (!bk.folderBackupSupported()) {
+        box.appendChild(h('div', { class: 'row small', style: { alignItems: 'flex-start' } }, icon('info', { size: 16 }), h('span', { class: 'muted', text: t('backup.unsupported') })));
+        return;
+      }
+      const dir = bk.rememberedFolder();
+      if (dir) {
+        const last = store.settings.lastBackup ? fmtDateTime(store.settings.lastBackup) : t('settings.never');
+        box.appendChild(h('div', { class: 'row' }, icon('folder', { size: 22 }), h('div', { class: 'grow' },
+          h('div', { style: { fontWeight: 600 }, text: dir.name }),
+          h('div', { class: 'muted small', text: `${t('backup.lastBackup')}: ${last}` }))));
+      } else {
+        box.appendChild(h('p', { class: 'muted small', style: { margin: '0 0 4px' }, text: t('backup.folderHint') }));
+      }
+      const row = h('div', { class: 'row wrap', style: { marginTop: '10px' } });
+      if (dir) row.appendChild(h('button', { class: 'btn primary', onclick: (e) => backupTo(e.currentTarget, dir) }, icon('archive', { size: 16 }), t('backup.now')));
+      row.appendChild(h('button', { class: dir ? 'btn' : 'btn primary', onclick: async (e) => { const btn = e.currentTarget; const handle = await pick(); if (handle) backupTo(btn, handle); } },
+        icon('folder-plus', { size: 16 }), dir ? t('backup.change') : t('backup.choose')));
+      row.appendChild(h('button', { class: 'btn', onclick: async (e) => {
+        const btn = e.currentTarget; const handle = await pick(); if (!handle) return;
+        run(btn, async () => { const r = await bk.restoreFromFolder(handle, setProg); toast(t('toast.restoreDone', { files: r.files, folders: r.folders }), { type: 'success', duration: 6000 }); });
+      } }, icon('restore', { size: 16 }), t('backup.restoreFolder')));
+      if (dir) row.appendChild(h('button', { class: 'btn sm', title: t('backup.forgetHint'), onclick: async () => { await bk.forgetFolder(); renderFolder(); } }, icon('x', { size: 14 }), t('backup.forget')));
+      box.appendChild(row);
+    };
+    renderFolder();
+    p.appendChild(box);
+
+    // ---- ZIP file (works in every browser) ----
+    p.appendChild(h('h4', { text: t('backup.zipTitle') }));
+    p.appendChild(h('p', { class: 'muted small', text: t('backup.zipDesc') }));
     const fileInput = h('input', { type: 'file', accept: '.zip', style: { display: 'none' }, onchange: async (e) => {
-      const f = e.target.files[0]; if (!f) return;
-      prog.style.display = ''; prog.firstChild.style.width = '0%';
-      try {
-        const { restoreBackup } = await import('../backup.js');
-        const r = await restoreBackup(f, (n, total) => { prog.firstChild.style.width = Math.round(n / total * 100) + '%'; });
-        toast(t('toast.restoreDone', { files: r.files, folders: r.folders }), { type: 'success' });
-      } catch (err) { console.error(err); toast(t('toast.error') + ': ' + err.message, { type: 'error' }); }
-      prog.style.display = 'none'; e.target.value = '';
+      const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+      run(null, async () => { const r = await bk.restoreBackup(f, setProg); toast(t('toast.restoreDone', { files: r.files, folders: r.folders }), { type: 'success', duration: 6000 }); });
     } });
     p.appendChild(h('div', { class: 'row wrap' },
-      h('button', { class: 'btn primary', onclick: async (e) => {
-        const b = e.currentTarget; b.disabled = true; prog.style.display = ''; prog.firstChild.style.width = '0%';
-        try { const { exportBackup } = await import('../backup.js'); await exportBackup((n, total, pct) => { prog.firstChild.style.width = (pct != null ? pct : Math.round(n / Math.max(1, total) * 100)) + '%'; }); toast(t('toast.backupDone'), { type: 'success' }); }
-        catch (err) { console.error(err); toast(t('toast.error'), { type: 'error' }); }
-        b.disabled = false; prog.style.display = 'none';
-      } }, icon('download', { size: 16 }), t('action.export')),
+      h('button', { class: 'btn', onclick: (e) => run(e.currentTarget, async () => { await bk.exportBackup(setProg); toast(t('toast.backupDone'), { type: 'success' }); }) }, icon('download', { size: 16 }), t('action.export')),
       h('button', { class: 'btn', onclick: () => fileInput.click() }, icon('upload', { size: 16 }), t('action.importBackup')), fileInput));
-    p.appendChild(prog);
   };
 
   const storage = (p) => {

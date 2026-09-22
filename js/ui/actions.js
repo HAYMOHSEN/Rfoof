@@ -62,21 +62,9 @@ export const actions = {
   },
   async download(id) {
     const f = store.file(id); if (!f) return;
-    let blob = await store.getBlob(id);
-    if (!blob) {
-      if (!app.sync) return toast(t('toast.needSignIn'), { type: 'error' });
-      try { blob = await app.sync.ensureBlob(id); } catch { return toast(t('toast.needOnline'), { type: 'error' }); }
-    }
+    const blob = await store.getBlob(id);
+    if (!blob) return toast(t('toast.error'), { type: 'error' });
     downloadBlob(blob, f.title.toLowerCase().endsWith('.' + f.ext) || !f.ext ? f.title : `${f.title}.${f.ext}`);
-  },
-  async makeOffline(ids) {
-    if (!app.sync) return toast(t('toast.needSignIn'), { type: 'error' });
-    let n = 0;
-    for (const id of ids) { try { await app.sync.ensureBlob(id); n++; } catch (e) { console.warn(e); } }
-    if (n) toast(t('toast.downloaded'), { type: 'success' });
-  },
-  async freeSpace(ids) {
-    for (const id of ids) { const f = store.file(id); if (f && f.remoteId && f.syncState === 'synced') await store.removeBlob(id); }
   },
   // ---- folders ----
   async newFolder(parentId = '') { return folderDialog({ parentId }); },
@@ -105,7 +93,6 @@ export const actions = {
     const single = ids.length === 1 ? store.file(ids[0]) : null;
     const anyTrashed = ids.some(id => store.file(id)?.deletedAt);
     const allStarred = ids.every(id => store.file(id)?.starred);
-    const cloudOnly = ids.some(id => store.file(id) && !store.file(id).hasBlob);
     const items = [];
     if (anyTrashed) {
       items.push({ label: t('action.restore'), icon: 'restore', onClick: () => actions.restore(ids) });
@@ -121,8 +108,6 @@ export const actions = {
     items.push({ custom: cp });
     items.push({ separator: true });
     if (single) items.push({ label: t('action.download'), icon: 'download', onClick: () => actions.download(single.id) });
-    if (cloudOnly && app.sync) items.push({ label: t('action.downloadOffline'), icon: 'cloud-download', onClick: () => actions.makeOffline(ids) });
-    if (single && single.hasBlob && single.remoteId && single.syncState === 'synced') items.push({ label: t('action.removeLocal'), icon: 'cloud', onClick: () => actions.freeSpace(ids) });
     items.push({ label: t('action.details'), icon: 'info', onClick: () => { store.select(ids); app.setDetails(true); } });
     items.push({ separator: true });
     items.push({ label: t('action.delete'), icon: 'trash', danger: true, onClick: () => actions.trash(ids), kbd: 'Del' });
