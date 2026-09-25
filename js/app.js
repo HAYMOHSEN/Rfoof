@@ -43,6 +43,13 @@ export const app = {
     this.setupGlobal();
     if (storeLaunch && !wasLicensed) toast(t('license.activated'), { type: 'success', duration: 6000 });
     setTimeout(() => this.maybeAskForRating(), 20000);
+    // 2.0.2 reads Arabic PDFs (and Excel cells typed as inline text) correctly: index those files once more
+    if ((store.settings.indexVersion || 1) < 2) {
+      for (const f of Array.from(store.files.values())) {
+        if (!f.deletedAt && f.hasBlob && f.indexed && (f.kind === 'pdf' || ['xlsx', 'xlsm', 'xltx'].includes(f.ext))) await store.updateFile(f.id, { indexed: false }, { sync: false, emit: false });
+      }
+      await store.setSetting('indexVersion', 2);
+    }
     // resume background indexing for anything not yet indexed
     const pending = Array.from(store.files.values()).filter(f => !f.deletedAt && f.hasBlob && (!f.indexed || !f.thumb)).map(f => f.id);
     if (pending.length) indexer.add(pending);

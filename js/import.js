@@ -7,6 +7,7 @@ import { extOf, baseName, kindOf, mimeOf, uid, sha256Hex, ymd, hms, pad2, sleep,
 import { indexWords } from './search.js';
 import { docxText, xlsxText, pptxText } from './office.js';
 import { license } from './license.js';
+import { pageText } from './pdftext.js';
 
 export const importEvents = new Emitter();
 
@@ -139,9 +140,7 @@ export async function extractText(file, blob) {
         for (let i = 1; i <= n && out.length < max; i++) {
           const page = await doc.getPage(i);
           const tc = await page.getTextContent();
-          let line = '';
-          for (const it of tc.items) { if (it.str) line += it.str; if (it.hasEOL) line += '\n'; else line += ' '; }
-          out += line + '\n';
+          out += pageText(tc.items) + '\n';
         }
         const meta = await doc.getMetadata().catch(() => null);
         if (meta?.info?.Title) out = meta.info.Title + '\n' + out;

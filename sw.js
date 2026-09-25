@@ -2,7 +2,7 @@
 //  Rfoof – service worker (offline app shell)
 //  Bump VERSION whenever you publish a new build.
 // ============================================================
-const VERSION = '2.0.1';
+const VERSION = '2.0.2';
 const CACHE = 'rfoof-' + VERSION;
 const PRECACHE = [
   './',
@@ -25,6 +25,7 @@ const PRECACHE = [
   './js/install.js',
   './js/logo.js',
   './js/office.js',
+  './js/pdftext.js',
   './js/search.js',
   './js/store.js',
   './js/ui/actions.js',

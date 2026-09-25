@@ -132,7 +132,7 @@ export function highlight(text, query) {
 }
 
 // Extract a snippet around the first matched term in a text
-export function snippet(text, query, radius = 60) {
+export function snippet(text, query, radius = 60, before = radius) {
   if (!text) return '';
   const terms = tokenize(query).filter(t => t.length >= 2);
   const orig = String(text);
@@ -144,7 +144,7 @@ export function snippet(text, query, radius = 60) {
   for (const term of terms) { pos = norm.indexOf(term); if (pos !== -1) break; }
   if (pos === -1) return chars.slice(0, radius * 2).join('').replace(/\s+/g, ' ');
   const oPos = map[pos] ?? 0;
-  const start = Math.max(0, oPos - radius);
+  const start = Math.max(0, oPos - before);
   const end = Math.min(chars.length, oPos + radius);
   return (start > 0 ? '…' : '') + chars.slice(start, end).join('').replace(/\s+/g, ' ') + (end < chars.length ? '…' : '');
 }

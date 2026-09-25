@@ -351,6 +351,22 @@ export async function xlsxText(buffer, maxChars = 200000) {
     const sd = parseXml(await ssFile.async('string'));
     for (const si of kids(sd.documentElement, 'si')) { const t = all(si, 't').map(x => x.textContent).join(''); if (t.trim()) { parts.push(t); total += t.length; if (total > maxChars) break; } }
   }
+  // text typed straight into cells (inline strings) and text results of formulas are not in
+  // sharedStrings.xml – many tools other than Excel write every cell that way
+  const sheetFiles = zip.file(/^xl\/worksheets\/[^/]+\.xml$/).sort((a, b) => a.name.localeCompare(b.name, 'en', { numeric: true }));
+  for (const sf of sheetFiles) {
+    if (total > maxChars) break;
+    const xml = await sf.async('string');
+    if (!/t="(inlineStr|str)"/.test(xml)) continue;
+    const sd = parseXml(xml);
+    for (const c of all(sd, 'c')) {
+      const type = attr(c, 't');
+      let t = '';
+      if (type === 'inlineStr') t = all(c, 't').map(x => x.textContent).join('');
+      else if (type === 'str') t = kids(c, 'v')[0]?.textContent || '';
+      if (t.trim()) { parts.push(t); total += t.length; if (total > maxChars) break; }
+    }
+  }
   const wbFile = zip.file('xl/workbook.xml');
   if (wbFile) { const wb = parseXml(await wbFile.async('string')); for (const s of all(wb, 'sheet')) parts.unshift(attr(s, 'name') || ''); }
   return parts.join('\n');

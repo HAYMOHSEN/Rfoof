@@ -249,7 +249,8 @@ export class ContentView {
     if (f.tags?.length) { const tg = h('div', { class: 'tags' }); f.tags.slice(0, 3).forEach(x => tg.appendChild(h('span', { class: 'chip', text: x }))); if (f.tags.length > 3) tg.appendChild(h('span', { class: 'chip', text: '+' + (f.tags.length - 3) })); body.appendChild(tg); }
     const meta = h('div', { class: 'meta' }, h('span', { class: 'bdi', text: (f.ext || t('kind.' + f.kind)).toUpperCase() }), ' · ', h('span', { class: 'ltr', text: formatBytes(f.size, locale()) }), ' · ', h('span', { class: 'bdi', text: fmtDate(f.addedAt) }));
     body.appendChild(meta);
-    if (this.snippets.has(f.id)) { const sn = h('div', { class: 'result-snippet' }); store.getText(f.id).then(txt => { sn.innerHTML = highlight(snippet(txt, q, 40), q); }); body.appendChild(sn); }
+    // one line in a narrow card: start just before the hit so the highlighted word stays visible
+    if (this.snippets.has(f.id)) { const sn = h('div', { class: 'result-snippet' }); store.getText(f.id).then(txt => { sn.innerHTML = highlight(snippet(txt, q, 40, 12), q); }); body.appendChild(sn); }
     card.appendChild(body);
     this.wireItem(card, f, index);
     return card;

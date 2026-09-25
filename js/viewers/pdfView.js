@@ -4,6 +4,7 @@ import { t } from '../i18n.js';
 import { pdfjs, pdfDocOptions } from '../import.js';
 import { icon } from '../icons.js';
 import { normalize } from '../search.js';
+import { pageText } from '../pdftext.js';
 
 export async function pdfView(stage, blob, ctrl) {
   let lib;
@@ -95,7 +96,7 @@ export async function pdfView(stage, blob, ctrl) {
     for (let i = 1; i <= n; i++) {
       let tc = textCache.get(i);
       if (!tc) { try { tc = await (await doc.getPage(i)).getTextContent(); textCache.set(i, tc); } catch { continue; } }
-      const text = tc.items.map(it => it.str || '').join(' ');
+      const text = pageText(tc.items);
       if (normalize(text).includes(nq)) findState.pages.push(i);
       if (findState.q !== q) return;
     }

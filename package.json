@@ -1,11 +1,11 @@
 {
   "name": "rfoof",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "private": true,
   "type": "module",
   "description": "Rfoof – documents & files organizer (PWA)",
   "scripts": {
     "start": "python3 -m http.server 8080",
-    "test": "node test/search.test.js && node test/license.test.js"
+    "test": "node test/search.test.js && node test/license.test.js && node test/pdftext.test.js"
   }
 }

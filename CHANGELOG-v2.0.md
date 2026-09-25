@@ -1,3 +1,13 @@
+# Rfoof 2.0.2 — Arabic search inside PDFs and Excel fixed
+
+- **Arabic PDFs**: many PDFs (notably Edge / Chrome "Save as PDF") draw Arabic one glyph at a time, right to left, in presentation forms. The extracted text came out reversed and spaced letter by letter, so nothing Arabic inside those PDFs could be found. New `js/pdftext.js` rebuilds each line from the glyph positions (right-to-left order, numbers and Latin words kept left-to-right, brackets un-mirrored, real word gaps only, presentation forms → ordinary letters). Used for indexing (`js/import.js`) and for "find in document" in the PDF viewer (`js/viewers/pdfView.js`). Pages without Arabic keep the previous behaviour unchanged.
+- **Excel**: text typed as inline strings (written by many tools other than Excel) and text results of formulas were not indexed; only shared strings were. `xlsxText` in `js/office.js` now reads them too.
+- **Existing libraries**: on first start of 2.0.2, PDFs and Excel files already in the library are indexed once more in the background, so old files become searchable too.
+- Search result cards start the one-line snippet just before the match, so the highlighted word stays visible.
+- New `test/pdftext.test.js` with real pdf.js output as fixtures (`test/fixtures/pdf-items.json`); `sw.js` precaches `js/pdftext.js`; version 2.0.2.
+
+---
+
 # Rfoof 2.0.1 — Store link, ratings, restore limit
 
 - `js/config.js`: `storeProductId` = `9NKH02WXWH03` (the live Store listing), new `storeCampaignId` = `rfoof-app`. The "Get the full version" button now opens the Store page, tagged `?cid=rfoof-app` so Partner Center ▸ Acquisitions shows the purchases that started inside the app.
