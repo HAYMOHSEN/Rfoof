@@ -1,3 +1,14 @@
+# Rfoof 2.0.1 — Store link, ratings, restore limit
+
+- `js/config.js`: `storeProductId` = `9NKH02WXWH03` (the live Store listing), new `storeCampaignId` = `rfoof-app`. The "Get the full version" button now opens the Store page, tagged `?cid=rfoof-app` so Partner Center ▸ Acquisitions shows the purchases that started inside the app.
+- **Rate Rfoof**: a button in Settings ▸ License and Settings ▸ About, plus one polite, one-time reminder (after 3 days and 20 files). Shown only to owners (Store or license-key activations), since only owners can rate in the Store. Opens `ms-windows-store://review/?ProductId=…`.
+- **Free version**: restoring a backup (folder or ZIP) now counts toward the same file limit as adding files; before, a restore could bypass it. Store / key owners are not affected.
+- New strings `license.restoreBlocked`, `rate.*` (EN + AR); tests for Store links and rating rules; `sw.js` / `config.js` / `package.json` version 2.0.1.
+
+Upload the changed files over the old ones on GitHub; no new Store submission is needed.
+
+---
+
 # Rfoof 2.0.0 — offline-first, backup anywhere
 
 OneDrive sync and the Microsoft sign-in are gone. Nothing to register in Entra, no client ID, no account. The library stays on the device and is backed up, on demand, into any folder the user picks.

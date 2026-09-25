@@ -123,7 +123,7 @@ Rfoof is a fast, private home for everything you keep: contracts, certificates, 
 ## الخطوة 4 — التسعير والبيع (شراء لمرة واحدة مدى الحياة)
 
 ### كيف يشتري الزبون التطبيق؟
-1. يبحث عن **Rfoof** في متجر Microsoft (أو يفتح رابط الصفحة `https://apps.microsoft.com/detail/<Store ID>`).
+1. يبحث عن **Rfoof** في متجر Microsoft (أو يفتح رابط الصفحة `https://apps.microsoft.com/detail/9NKH02WXWH03`).
 2. يضغط **Buy** ويدفع بحسابه في Microsoft (بطاقة/باي بال/رصيد المتجر بحسب بلده).
 3. يُثبَّت التطبيق تلقائيًا، وعند فتحه يكتشف التطبيق أنه أُطلق من حزمة المتجر ويفعّل **النسخة الكاملة** على ذلك الجهاز بلا أي خطوة إضافية.
 4. الترخيص مرتبط بحساب Microsoft الخاص بالزبون: يمكنه تثبيته على أجهزته الأخرى من صفحة **My Library** في المتجر دون دفع مجددًا (حتى 10 أجهزة بحسب سياسة المتجر).
@@ -150,7 +150,7 @@ Rfoof is a fast, private home for everything you keep: contracts, certificates, 
 
 ما عليك ضبطه في `js/config.js`:
 ```js
-storeProductId: '9NBLGGH4R315',   // من Partner Center ← Product identity ← Store ID
+storeProductId: '9NKH02WXWH03',   // من Partner Center ← Product identity ← Store ID
 trialImportLimit: 25,             // عدد الملفات المسموح إضافتها في النسخة المجانية (0 = تطبيق مجاني بلا حدود)
 licenseKeyHashes: [ ... ],        // (اختياري) افتح tools/license-key.html لتوليد مفاتيح وبصماتها
 ```

@@ -115,7 +115,7 @@ Rfoof is a fast, private home for everything you keep: contracts, certificates, 
 ## Step 4 — Pricing & selling (one-time, lifetime purchase)
 
 ### How a customer buys it
-1. Searches for **Rfoof** in the Microsoft Store (or opens `https://apps.microsoft.com/detail/<Store ID>`).
+1. Searches for **Rfoof** in the Microsoft Store (or opens `https://apps.microsoft.com/detail/9NKH02WXWH03`).
 2. Clicks **Buy** and pays with the payment method attached to their Microsoft account.
 3. The app installs; on first launch it detects that it was started from the Store package and unlocks the **full version** on that device — no extra step.
 4. The license belongs to the customer's Microsoft account: they can install it on their other devices from **My Library** in the Store without paying again (up to 10 devices per Store policy).
@@ -141,7 +141,7 @@ Because a PWA is hosted at a public URL, anyone could otherwise use it free in a
 
 Configure in `js/config.js`:
 ```js
-storeProductId: '9NBLGGH4R315',   // Partner Center → Product identity → Store ID
+storeProductId: '9NKH02WXWH03',   // Partner Center → Product identity → Store ID
 trialImportLimit: 25,             // files that can be added in the free version (0 = free app, no limit)
 licenseKeyHashes: [ ... ],        // optional: open tools/license-key.html to generate keys + hashes
 ```

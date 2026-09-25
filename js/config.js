@@ -5,7 +5,7 @@
 export const APP = {
   name: 'Rfoof',
   nameAr: 'رفوف',
-  version: '2.0.0',
+  version: '2.0.1',
 
   // ---- Offline-first, no cloud sync required ----
   // This version runs 100% locally. Users can export their library
@@ -22,11 +22,14 @@ export const APP = {
   // app with the referrer "app-info://platform/microsoft-store"). The public web
   // URL runs as a free trial limited to `trialImportLimit` added files.
   //   storeProductId  : Partner Center → Product management → Product identity → "Store ID"
-  //                     (e.g. 9NBLGGH4R315). Used for the "Get the full version" button.
+  //                     Used for the "Get the full version" and "Rate Rfoof" buttons.
+  //   storeCampaignId : ?cid= tag on those Store links, so Partner Center's Acquisitions
+  //                     report shows how many sales came from inside the app.
   //   trialImportLimit: files a device can add without a license. 0 = no limit (free app).
   //   licenseKeyHashes: SHA-256 hashes of license keys accepted in Settings → License.
   //                     Generate keys with tools/license-key.html and paste the hashes here.
-  storeProductId: '',
+  storeProductId: '9NKH02WXWH03',
+  storeCampaignId: 'rfoof-app',
   trialImportLimit: 25,
   licenseKeyHashes: [
     'fa957db3b3337bd2d7936a6f33b2f05639a9463c4ee6a1f35dd82a464898ee36', // owner's personal key (the key itself is kept private)

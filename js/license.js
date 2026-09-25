@@ -106,26 +106,61 @@ export const license = {
     licenseEvents.emit('change');
   },
 
+  // Store links carry ?cid=<storeCampaignId> so Partner Center (Acquisitions report)
+  // counts the page views and purchases that started from inside the app.
+  cid(sep = '?') {
+    return APP.storeCampaignId ? `${sep}cid=${encodeURIComponent(APP.storeCampaignId)}` : '';
+  },
   storeUrl() {
     const id = APP.storeProductId;
     if (!id) return '';
-    return `https://apps.microsoft.com/detail/${id}`;
+    return `https://apps.microsoft.com/detail/${id}${this.cid('?')}`;
   },
   storeProtocolUrl() {
     const id = APP.storeProductId;
-    return id ? `ms-windows-store://pdp/?productid=${id}` : '';
+    return id ? `ms-windows-store://pdp/?productid=${id}${this.cid('&')}` : '';
   },
+  /** Store app page that opens straight on "rate and review". */
+  reviewProtocolUrl() {
+    const id = APP.storeProductId;
+    return id ? `ms-windows-store://review/?ProductId=${id}` : '';
+  },
+
+  /** Only owners can rate in the Store, so the rating button is for Store / key activations. */
+  canRate() {
+    return !!APP.storeProductId && ['store', 'key'].includes(store.settings.licensed ? (store.settings.licenseSource || 'store') : '');
+  },
+  /**
+   * One polite, one-time rating reminder: owners who have used the app for a few days
+   * and already keep a real library in it. Never shown again once shown.
+   */
+  shouldAskForRating(fileCount, now = Date.now()) {
+    if (!this.canRate() || store.settings.ratePrompted) return false;
+    const since = store.settings.licensedAt || now;
+    return fileCount >= RATE_MIN_FILES && now - since >= RATE_MIN_DAYS * 86400000;
+  },
+
   /** Opens the Store listing (Store app on Windows, web page elsewhere). */
   openStore() {
-    const web = this.storeUrl();
-    if (!web) return false;
-    const isWindows = /Windows/i.test(navigator.userAgent);
-    if (isWindows) {
-      // try the Store app first, then fall back to the web listing
-      const t = Date.now();
-      location.href = this.storeProtocolUrl();
-      setTimeout(() => { if (Date.now() - t < 2500 && document.visibilityState === 'visible') window.open(web, '_blank', 'noopener'); }, 1200);
-    } else window.open(web, '_blank', 'noopener');
-    return true;
+    return openStoreLink(this.storeProtocolUrl(), this.storeUrl());
+  },
+  /** Opens the Store's rating dialog for Rfoof (web listing as a fallback). */
+  openReview() {
+    return openStoreLink(this.reviewProtocolUrl(), this.storeUrl());
   },
 };
+
+export const RATE_MIN_FILES = 20;
+export const RATE_MIN_DAYS = 3;
+
+function openStoreLink(protocolUrl, webUrl) {
+  if (!webUrl) return false;
+  const isWindows = /Windows/i.test(navigator.userAgent);
+  if (isWindows && protocolUrl) {
+    // try the Store app first, then fall back to the web listing
+    const t = Date.now();
+    location.href = protocolUrl;
+    setTimeout(() => { if (Date.now() - t < 2500 && document.visibilityState === 'visible') window.open(webUrl, '_blank', 'noopener'); }, 1200);
+  } else window.open(webUrl, '_blank', 'noopener');
+  return true;
+}

@@ -42,11 +42,20 @@ export const app = {
     this.registerSW();
     this.setupGlobal();
     if (storeLaunch && !wasLicensed) toast(t('license.activated'), { type: 'success', duration: 6000 });
+    setTimeout(() => this.maybeAskForRating(), 20000);
     // resume background indexing for anything not yet indexed
     const pending = Array.from(store.files.values()).filter(f => !f.deletedAt && f.hasBlob && (!f.indexed || !f.thumb)).map(f => f.id);
     if (pending.length) indexer.add(pending);
     this.handleLaunchQueue();
     this.handleUrlParams();
+  },
+
+  // One polite, one-time reminder to rate Rfoof in the Store (owners only, after a few days of real use).
+  maybeAskForRating() {
+    const count = Array.from(store.files.values()).filter(f => !f.deletedAt).length;
+    if (!license.shouldAskForRating(count)) return;
+    store.setSetting('ratePrompted', Date.now());
+    toast(t('rate.prompt'), { duration: 15000, action: { label: t('rate.button'), fn: () => license.openReview() } });
   },
 
   handleUrlParams() {

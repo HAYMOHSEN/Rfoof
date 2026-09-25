@@ -109,6 +109,10 @@ export function openSettings(initialTab = 'general') {
       try { await job(); } catch (err) { showError(err); }
       if (btn) btn.disabled = false; prog.style.display = 'none';
     };
+    const restoreToast = (r) => {
+      toast(t('toast.restoreDone', { files: r.files, folders: r.folders }), { type: 'success', duration: 6000 });
+      if (r.blocked) toast(t('license.restoreBlocked', { n: r.blocked, limit: license.limit() }), { type: 'error', duration: 9000, action: { label: t('license.getFullShort'), fn: () => license.openStore() } });
+    };
     // pick a folder while the click is still "fresh" (the browser only opens the picker right after a user gesture)
     const pick = async () => { try { return await bk.pickBackupFolder(); } catch (err) { showError(err); return null; } };
 
@@ -141,7 +145,7 @@ export function openSettings(initialTab = 'general') {
         icon('folder-plus', { size: 16 }), dir ? t('backup.change') : t('backup.choose')));
       row.appendChild(h('button', { class: 'btn', onclick: async (e) => {
         const btn = e.currentTarget; const handle = await pick(); if (!handle) return;
-        run(btn, async () => { const r = await bk.restoreFromFolder(handle, setProg); toast(t('toast.restoreDone', { files: r.files, folders: r.folders }), { type: 'success', duration: 6000 }); });
+        run(btn, async () => restoreToast(await bk.restoreFromFolder(handle, setProg)));
       } }, icon('restore', { size: 16 }), t('backup.restoreFolder')));
       if (dir) row.appendChild(h('button', { class: 'btn sm', title: t('backup.forgetHint'), onclick: async () => { await bk.forgetFolder(); renderFolder(); } }, icon('x', { size: 14 }), t('backup.forget')));
       box.appendChild(row);
@@ -154,7 +158,7 @@ export function openSettings(initialTab = 'general') {
     p.appendChild(h('p', { class: 'muted small', text: t('backup.zipDesc') }));
     const fileInput = h('input', { type: 'file', accept: '.zip', style: { display: 'none' }, onchange: async (e) => {
       const f = e.target.files[0]; e.target.value = ''; if (!f) return;
-      run(null, async () => { const r = await bk.restoreBackup(f, setProg); toast(t('toast.restoreDone', { files: r.files, folders: r.folders }), { type: 'success', duration: 6000 }); });
+      run(null, async () => restoreToast(await bk.restoreBackup(f, setProg)));
     } });
     p.appendChild(h('div', { class: 'row wrap' },
       h('button', { class: 'btn', onclick: (e) => run(e.currentTarget, async () => { await bk.exportBackup(setProg); toast(t('toast.backupDone'), { type: 'success' }); }) }, icon('download', { size: 16 }), t('action.export')),
@@ -189,6 +193,10 @@ export function openSettings(initialTab = 'general') {
         h('div', { style: { fontWeight: 600 }, text: active ? t('license.full') : t('license.trial') }),
         h('div', { class: 'muted small', text: active ? ({ key: t('license.viaKey'), local: t('license.viaLocal'), store: t('license.viaStore') }[license.source()] || t('license.full')) : t('license.remaining', { n: license.remaining(), limit: license.limit() }) }))));
     p.appendChild(status);
+    if (license.canRate()) {
+      p.appendChild(h('p', { class: 'muted small', text: t('rate.desc') }));
+      p.appendChild(h('button', { class: 'btn', onclick: () => license.openReview() }, icon('star', { size: 16 }), t('rate.button')));
+    }
     if (!active) {
       p.appendChild(h('p', { class: 'muted small', text: t('license.trialDesc', { limit: license.limit() }) }));
       p.appendChild(h('div', { class: 'progress', style: { margin: '6px 0 14px' } }, h('div', { style: { width: Math.min(100, Math.round(license.used() / Math.max(1, license.limit()) * 100)) + '%' } })));
@@ -212,7 +220,8 @@ export function openSettings(initialTab = 'general') {
     p.appendChild(h('p', { class: 'muted', text: t('app.tagline') }));
     p.appendChild(h('div', { class: 'row wrap' },
       h('a', { class: 'btn sm', href: APP.privacyUrl, target: '_blank', rel: 'noopener' }, icon('shield', { size: 16 }), t('settings.privacy')),
-      h('a', { class: 'btn sm', href: './licenses.html', target: '_blank', rel: 'noopener' }, icon('book', { size: 16 }), t('settings.licenses'))));
+      h('a', { class: 'btn sm', href: './licenses.html', target: '_blank', rel: 'noopener' }, icon('book', { size: 16 }), t('settings.licenses')),
+      license.canRate() ? h('button', { class: 'btn sm', onclick: () => license.openReview() }, icon('star', { size: 16 }), t('rate.button')) : null));
     p.appendChild(h('h4', { text: t('settings.shortcuts') }));
     const sc = h('div', { class: 'shortcut-list' });
     const rows = [['Ctrl + K', 'shortcut.palette'], ['Ctrl + F', 'shortcut.search'], ['Ctrl + I', 'shortcut.import'], ['Ctrl + Shift + N', 'shortcut.newFolder'], ['Ctrl + A', 'shortcut.selectAll'], ['Enter', 'shortcut.open'], ['F2', 'shortcut.rename'], ['Del', 'shortcut.delete'], ['S', 'shortcut.star'], ['← →', 'shortcut.nav'], ['Ctrl + D', 'shortcut.details'], ['Esc', 'shortcut.escape']];

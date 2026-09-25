@@ -17,6 +17,7 @@ import { store } from './store.js';
 import { zipLib } from './office.js';
 import { sanitizeFileName, ymd, downloadBlob, uid } from './utils.js';
 import { indexer } from './import.js';
+import { license } from './license.js';
 
 export const INDEX_NAME = 'rfoof-index.json';
 const README = 'Rfoof backup.\n\nYour files are inside the "Library" folder, organized exactly like your Rfoof folders; "Trash" holds files that were in the app\'s trash.\nrfoof-index.json keeps the titles, tags, colors and notes.\n\nTo restore: open Rfoof → Settings → Backup → "Restore from folder" (or from the ZIP).\n';
@@ -225,10 +226,15 @@ async function restoreFromIndex(index, readBlob, onProgress) {
   }
   const hashes = new Set(Array.from(store.files.values()).filter(f => !f.deletedAt && f.hash).map(f => f.hash));
   const list = index.files;
-  let n = 0;
+  // free version: a restore adds files like an import does, so it shares the same limit
+  // (otherwise any hand-made ZIP in the backup layout would bypass it)
+  const allowance = license.remaining();
+  let n = 0, blocked = 0;
   for (const rec of list) {
     n++; onProgress?.(n, list.length);
     if (store.file(rec.id) || (rec.hash && hashes.has(rec.hash))) { skipped++; continue; }
+    if (!rec.path) { skipped++; continue; }
+    if (files >= allowance) { blocked++; continue; }
     const blob = await readBlob(rec);
     if (!blob) { skipped++; continue; }
     const folderId = idMap.get(rec.folderId) ?? (store.folder(rec.folderId) ? rec.folderId : '');
@@ -236,7 +242,8 @@ async function restoreFromIndex(index, readBlob, onProgress) {
     if (rec.deletedAt) await store.updateFile(rec.id, { deletedAt: rec.deletedAt }, { sync: false, emit: false });
     files++;
   }
+  await license.countImports(files);
   indexer.add(list.map(r => r.id).filter(id => store.file(id)));
   store.emit('folders'); store.emit('files');
-  return { files, folders, skipped };
+  return { files, folders, skipped, blocked };
 }
