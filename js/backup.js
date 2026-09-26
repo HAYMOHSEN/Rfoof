@@ -81,6 +81,7 @@ export async function exportBackup(onProgress) {
   zip.file('README.txt', README);
   const out = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 1 } }, (m) => onProgress?.(index.files.length, index.files.length, m.percent));
   downloadBlob(out, `rfoof-backup-${ymd()}.zip`);
+  await store.setSetting('lastZipBackup', Date.now());
   return { files: written, folders: folders.length };
 }
 
@@ -142,7 +143,12 @@ async function writeText(dir, name, text) {
  * name and size are skipped, so repeated backups into the same folder only copy what is new.
  * Nothing is ever deleted from the folder.
  */
-export async function exportToFolder(handle, onProgress) {
+let folderJob = null;   // one folder backup at a time (a manual click can meet an automatic run)
+export function exportToFolder(handle, onProgress) {
+  if (!folderJob) folderJob = copyToFolder(handle, onProgress).finally(() => { folderJob = null; });
+  return folderJob;
+}
+async function copyToFolder(handle, onProgress) {
   if (!(await ensurePermission(handle, 'readwrite'))) throw new BackupError('permission');
   const { index, folders } = buildIndex();
   const dirs = new Map();

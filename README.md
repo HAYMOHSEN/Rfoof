@@ -73,6 +73,8 @@ Rfoof keeps everything on the device. There is nothing to register or configure 
 1. **Choose folder & back up** → pick any folder: a local disk, a USB stick, or the sync folder of a cloud service already installed on the PC (Google Drive, Dropbox, OneDrive, iCloud …). The browser asks once to allow access to that folder only.
 2. Rfoof writes the files there organized exactly like the app's folders (`Library/<Folder>/<Sub>/<Title>.<ext>`, trashed files under `Trash/`) plus `rfoof-index.json` (titles, tags, colors, notes) and a `README.txt`.
 3. The folder is remembered: next time it is one click on **Back up now**, and only new files are copied (a file with the same name and size is already up to date). Nothing is ever deleted from the folder.
+**Automatic backup**: choose an interval (every hour, 6 hours, day, week or month). While Rfoof is open, new files are copied into the backup folder on their own; if Rfoof was closed when a backup was due, it runs as soon as the app is opened. After a restart the browser may ask once for access to the folder — choosing *Allow on every visit* makes later backups silent. In browsers without folder backups (Firefox, phones) Rfoof reminds you to download a ZIP instead.
+
 4. On another device: **Restore from folder** → pick the same folder (e.g. through the cloud service's synced copy). Files already present are skipped, folders with the same name are merged, so restoring repeatedly is safe.
 
 **ZIP file** (every browser, including Firefox and phones): **Export backup (.zip)** downloads the same layout as one file; **Restore backup (.zip)** brings it back.

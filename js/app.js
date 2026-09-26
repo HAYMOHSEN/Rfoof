@@ -21,6 +21,7 @@ import { openSettings } from './ui/settings.js';
 import { openWelcome } from './ui/welcome.js';
 import { indexer, importEvents } from './import.js';
 import { license } from './license.js';
+import { startAutoBackup } from './autobackup.js';
 import { initInstall, install } from './install.js';
 
 export const app = {
@@ -43,6 +44,7 @@ export const app = {
     this.setupGlobal();
     if (storeLaunch && !wasLicensed) toast(t('license.activated'), { type: 'success', duration: 6000 });
     setTimeout(() => this.maybeAskForRating(), 20000);
+    startAutoBackup();
     // 2.0.2 reads Arabic PDFs (and Excel cells typed as inline text) correctly: index those files once more
     if ((store.settings.indexVersion || 1) < 2) {
       for (const f of Array.from(store.files.values())) {

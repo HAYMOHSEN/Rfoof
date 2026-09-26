@@ -1,3 +1,12 @@
+# Rfoof 2.0.4 — automatic backup, title bar fix
+
+- **Automatic backup** (Settings ▸ Backup): off / every hour / 6 hours / day / week / month. New `js/autobackup.js`: while the app is open it checks every 5 minutes (and when the window becomes visible again); when a backup is due it copies new files into the backup folder on its own. If the browser needs permission for the folder again, a toast offers a one-click "Back up now" (at most one reminder per 2 hours). Without folder support (Firefox, phones) it reminds the user to download a ZIP. Shows the time of the next backup.
+- `js/backup.js`: only one folder backup runs at a time (manual and automatic share the job); ZIP exports record `lastZipBackup`.
+- **Title bar overlap fixed**: the installed app hides the title bar (Window Controls Overlay) and Edge draws the minimize / maximize / close buttons on top of the page, over "Add files" and the icons. `css/app.css` now keeps the top bar's content inside `env(titlebar-area-*)` and makes its empty parts drag the window like a title bar.
+- New strings `autobackup.*` (EN + AR); `test/autobackup.test.js`; `sw.js` precaches `js/autobackup.js`; version 2.0.4.
+
+---
+
 # Rfoof 2.0.3 — honest storage figure
 
 - Since Chrome / Edge 144 the browser tells web apps that at most 10 GB are free (`quota = usage + min(10 GiB, free space)`), to stop sites from detecting private browsing. The real limit did not change (about 60% of the disk, within the free space). Settings ▸ Storage and the sidebar now say "more than 10 GB" with a short explanation instead of a bar that suggested the library would be full at 10 GB (`db.storageInfo()` in `js/db.js`, `js/ui/settings.js`, `js/ui/sidebar.js`, new strings `settings.availableMore`, `settings.quotaCapped`).

@@ -8,6 +8,7 @@ import { db } from '../db.js';
 import { APP } from '../config.js';
 import { app } from '../app.js';
 import * as bk from '../backup.js';
+import * as ab from '../autobackup.js';
 import { license, licenseEvents } from '../license.js';
 import { install, installEvents } from '../install.js';
 
@@ -163,6 +164,30 @@ export function openSettings(initialTab = 'general') {
     p.appendChild(h('div', { class: 'row wrap' },
       h('button', { class: 'btn', onclick: (e) => run(e.currentTarget, async () => { await bk.exportBackup(setProg); toast(t('toast.backupDone'), { type: 'success' }); }) }, icon('download', { size: 16 }), t('action.export')),
       h('button', { class: 'btn', onclick: () => fileInput.click() }, icon('upload', { size: 16 }), t('action.importBackup')), fileInput));
+
+    // ---- automatic backup (interval chosen by the user) ----
+    p.appendChild(h('h4', { text: t('autobackup.title') }));
+    const autoBox = h('div', { class: 'card-box' });
+    const renderAuto = () => {
+      clear(autoBox);
+      const folderMode = bk.folderBackupSupported();
+      const hasFolder = !!bk.rememberedFolder();
+      const current = store.settings.autoBackup && ab.INTERVALS[store.settings.autoBackup] ? store.settings.autoBackup : 'off';
+      const sel = h('select', { class: 'select', style: { maxWidth: '240px' }, disabled: folderMode && !hasFolder, onchange: async (e) => { await store.setSetting('autoBackup', e.target.value); renderAuto(); } },
+        Object.keys(ab.INTERVALS).map(k => h('option', { value: k, selected: k === current, text: t('autobackup.' + k) })));
+      autoBox.appendChild(h('div', { class: 'row wrap', style: { gap: '12px' } }, sel,
+        h('span', { class: 'muted small', text: (() => {
+          if (folderMode && !hasFolder) return t('autobackup.needFolder');
+          const due = ab.nextDue(); if (!due) return '';
+          return due <= Date.now() ? t('autobackup.nextNow') : t('autobackup.next', { time: fmtDateTime(due) });
+        })() })));
+      autoBox.appendChild(h('p', { class: 'muted small', style: { margin: '10px 0 0' }, text: folderMode ? t('autobackup.desc') : t('autobackup.descZip') }));
+      if (folderMode && hasFolder && current !== 'off') autoBox.appendChild(h('p', { class: 'muted small', style: { margin: '6px 0 0' }, text: t('autobackup.permHint') }));
+    };
+    renderAuto();
+    p.appendChild(autoBox);
+    // keep "next backup" and the enabled state current when a folder is chosen, forgotten or backed up
+    paneCleanup = store.on('settings', (k) => { if (['backupDir', 'lastBackup', 'lastZipBackup', 'autoBackup'].includes(k)) renderAuto(); });
   };
 
   const storage = (p) => {

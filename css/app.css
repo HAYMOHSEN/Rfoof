@@ -609,3 +609,17 @@ body.has-bulk .toasts { bottom: 84px; }
 @media (max-width: 640px) { .viewer-top .vmeta, .viewer-top .zoom-label, .viewer-top .v-fit, .viewer-top .v-full, .viewer-top .v-dl { display: none !important; } .viewer-top { padding: 0 4px; gap: 0; } .viewer-nav { width: 34px; height: 52px; } }
 /* print */
 @media print { .topbar, .sidebar, .details, .toolbar, .bulkbar { display: none !important; } }
+
+/* ---------- installed app without a title bar (Window Controls Overlay) ----------
+   Edge draws the minimize / maximize / close buttons (and its app menu) on top of the page.
+   env(titlebar-area-*) is the free part of the title bar: keep the top bar's content inside it
+   (physical left/right, because the buttons' side depends on Windows, not on the app language)
+   and let the empty parts of the top bar move the window like a normal title bar. */
+@media (display-mode: window-controls-overlay) {
+  .topbar {
+    padding-left: max(12px, calc(env(titlebar-area-x, 0px) + 8px));
+    padding-right: max(12px, calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw) + 8px));
+    -webkit-app-region: drag; app-region: drag;
+  }
+  .topbar button, .topbar input, .topbar a, .topbar select, .topbar .searchbox, .topbar [role="button"] { -webkit-app-region: no-drag; app-region: no-drag; }
+}

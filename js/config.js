@@ -5,7 +5,7 @@
 export const APP = {
   name: 'Rfoof',
   nameAr: 'رفوف',
-  version: '2.0.3',
+  version: '2.0.4',
 
   // ---- Offline-first, no cloud sync required ----
   // This version runs 100% locally. Users can export their library
