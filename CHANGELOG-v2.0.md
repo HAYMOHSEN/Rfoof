@@ -1,3 +1,10 @@
+# Rfoof 2.0.3 — honest storage figure
+
+- Since Chrome / Edge 144 the browser tells web apps that at most 10 GB are free (`quota = usage + min(10 GiB, free space)`), to stop sites from detecting private browsing. The real limit did not change (about 60% of the disk, within the free space). Settings ▸ Storage and the sidebar now say "more than 10 GB" with a short explanation instead of a bar that suggested the library would be full at 10 GB (`db.storageInfo()` in `js/db.js`, `js/ui/settings.js`, `js/ui/sidebar.js`, new strings `settings.availableMore`, `settings.quotaCapped`).
+- Version 2.0.3.
+
+---
+
 # Rfoof 2.0.2 — Arabic search inside PDFs and Excel fixed
 
 - **Arabic PDFs**: many PDFs (notably Edge / Chrome "Save as PDF") draw Arabic one glyph at a time, right to left, in presentation forms. The extracted text came out reversed and spaced letter by letter, so nothing Arabic inside those PDFs could be found. New `js/pdftext.js` rebuilds each line from the glyph positions (right-to-left order, numbers and Latin words kept left-to-right, brackets un-mirrored, real word gaps only, presentation forms → ordinary letters). Used for indexing (`js/import.js`) and for "find in document" in the PDF viewer (`js/viewers/pdfView.js`). Pages without Arabic keep the previous behaviour unchanged.

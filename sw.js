@@ -2,7 +2,7 @@
 //  Rfoof – service worker (offline app shell)
 //  Bump VERSION whenever you publish a new build.
 // ============================================================
-const VERSION = '2.0.2';
+const VERSION = '2.0.3';
 const CACHE = 'rfoof-' + VERSION;
 const PRECACHE = [
   './',

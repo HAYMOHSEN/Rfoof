@@ -119,11 +119,13 @@ export class Sidebar {
     const meter = h('div', { class: 'storage-meter' });
     foot.appendChild(meter);
     el.appendChild(foot);
-    db.estimate().then(({ usage = 0, quota = 0 }) => {
+    db.storageInfo().then(({ usage, quota, free, capped }) => {
       const pct = quota ? Math.min(100, Math.round((usage / quota) * 100)) : 0;
       clear(meter);
-      meter.appendChild(h('div', { class: 'row between' }, h('span', { text: t('label.storage') }), h('span', { class: 'ltr', text: formatBytes(usage, locale()) + (quota ? ' / ' + formatBytes(quota, locale()) : '') })));
-      meter.appendChild(h('div', { class: 'progress' }, h('div', { style: { width: pct + '%' } })));
+      meter.appendChild(h('div', { class: 'row between' }, h('span', { text: t('label.storage') }), h('span', { class: 'ltr', text: formatBytes(usage, locale()) + (quota && !capped ? ' / ' + formatBytes(quota, locale()) : '') })));
+      // Edge / Chrome report at most 10 GB free (see db.storageInfo): show "more than 10 GB free" instead of a bar that would fill up at 10 GB
+      if (capped) meter.appendChild(h('div', { class: 'muted small', text: `${t('settings.available')}: ${t('settings.availableMore', { size: formatBytes(free, locale()) })}` }));
+      else meter.appendChild(h('div', { class: 'progress' }, h('div', { style: { width: pct + '%' } })));
     });
   }
 }

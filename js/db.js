@@ -116,6 +116,21 @@ export const db = {
     await tx(names, 'readwrite', t => { for (const n of names) t.objectStore(n).clear(); return Promise.resolve(); });
   },
 
+  /**
+   * Usage and free space as far as they can be known.
+   * Since Chrome / Edge 144 the browser reports quota = usage + min(10 GiB, free disk space) so that
+   * sites can't detect private browsing; the real limit (about 60% of the disk, within the free
+   * space) did not change. When the reported headroom is exactly that 10 GiB cap, all we know is
+   * "at least 10 GiB" → capped: true.
+   */
+  async storageInfo() {
+    const { usage = 0, quota = 0 } = await this.estimate();
+    const free = Math.max(0, quota - usage);
+    const ua = typeof navigator !== 'undefined' ? navigator.userAgent || '' : '';
+    const chromium = /(Chrome|Chromium|Edg)\//.test(ua) && !/Firefox\//.test(ua);
+    const cap = 10 * 1024 ** 3;
+    return { usage, quota, free, capped: chromium && Math.abs(free - cap) <= 16 * 1024 ** 2 };
+  },
   async estimate() {
     try { return await navigator.storage.estimate(); } catch { return { usage: 0, quota: 0 }; }
   },

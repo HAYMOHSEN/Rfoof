@@ -169,11 +169,14 @@ export function openSettings(initialTab = 'general') {
     p.appendChild(h('h3', { text: t('settings.storage') }));
     const box = h('div', { class: 'card-box' }, h('div', { class: 'muted small', text: '…' }));
     p.appendChild(box);
-    Promise.all([db.estimate(), db.persisted()]).then(([{ usage = 0, quota = 0 }, persisted]) => {
+    Promise.all([db.storageInfo(), db.persisted()]).then(([{ usage, quota, free, capped }, persisted]) => {
       clear(box);
       const pct = quota ? Math.min(100, Math.round(usage / quota * 100)) : 0;
-      box.appendChild(h('div', { class: 'row between' }, h('span', { text: `${t('settings.used')}: ${formatBytes(usage, locale())}` }), h('span', { class: 'muted', text: quota ? `${t('settings.available')}: ${formatBytes(quota - usage, locale())}` : '' })));
-      box.appendChild(h('div', { class: 'progress', style: { margin: '8px 0' } }, h('div', { style: { width: pct + '%' } })));
+      const freeText = capped ? t('settings.availableMore', { size: formatBytes(free, locale()) }) : formatBytes(free, locale());
+      box.appendChild(h('div', { class: 'row between' }, h('span', { text: `${t('settings.used')}: ${formatBytes(usage, locale())}` }), h('span', { class: 'muted', text: quota ? `${t('settings.available')}: ${freeText}` : '' })));
+      // with the 10 GB reporting cap a bar would suggest the library fills up at 10 GB, which is not true
+      if (capped) box.appendChild(h('p', { class: 'muted small', style: { margin: '8px 0' }, text: t('settings.quotaCapped') }));
+      else box.appendChild(h('div', { class: 'progress', style: { margin: '8px 0' } }, h('div', { style: { width: pct + '%' } })));
       box.appendChild(h('div', { class: 'row small' }, icon(persisted ? 'shield' : 'alert', { size: 16 }), h('span', { class: 'muted', text: persisted ? t('settings.persisted') : t('settings.notPersisted') })));
     });
     p.appendChild(h('div', { class: 'row wrap', style: { marginTop: '14px' } },
