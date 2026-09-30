@@ -14,7 +14,7 @@ export const APP = {
 
   // Links shown in Settings → About
   website: '',
-  supportEmail: 'haymohse@gmail.com',
+  supportEmail: 'haymohsen@gmail.com',
   privacyUrl: './privacy.html',
 
   // ---- Licensing (Microsoft Store edition) --------------------
