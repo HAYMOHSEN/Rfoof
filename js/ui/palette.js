@@ -27,6 +27,7 @@ export function openPalette(initial = '') {
     { label: t('nav.allFiles'), icon: 'layers', run: () => store.navigate({ type: 'all' }) },
     { label: t('nav.recent'), icon: 'clock', run: () => store.navigate({ type: 'recent' }) },
     { label: t('nav.starred'), icon: 'star', run: () => store.navigate({ type: 'starred' }) },
+    { label: t('nav.expiring'), icon: 'calendar', run: () => store.navigate({ type: 'expiring' }) },
     { label: t('nav.trash'), icon: 'trash', run: () => store.navigate({ type: 'trash' }) },
     { label: t('settings.title'), icon: 'settings', run: () => app.openSettings() },
     { label: t('settings.theme') + ': ' + t('settings.theme.' + (store.settings.theme === 'dark' ? 'light' : 'dark')), icon: store.settings.theme === 'dark' ? 'sun' : 'moon', run: () => { store.setSetting('theme', store.settings.theme === 'dark' ? 'light' : 'dark'); app.applyTheme(); } },

@@ -60,6 +60,39 @@ export const actions = {
   async addTags(ids, tags) {
     await store.bulkUpdate(Array.from(ids), (f) => ({ tags: Array.from(new Set([...(f.tags || []), ...tags])) }));
   },
+  /** Print a PDF, image or text file. PDFs open in a new tab, where the PDF viewer prints; the rest print through a hidden frame. */
+  async print(id) {
+    const f = store.file(id); if (!f) return;
+    if (!['pdf', 'image', 'text', 'code'].includes(f.kind)) { toast(t('print.unsupported'), { type: 'error', duration: 6000 }); return; }
+    const blob = await store.getBlob(id);
+    if (!blob) { toast(t('toast.error'), { type: 'error' }); return; }
+    const url = URL.createObjectURL(blob);
+    if (f.kind === 'pdf') { window.open(url, '_blank', 'noopener'); setTimeout(() => URL.revokeObjectURL(url), 120000); return; }
+    const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const inner = f.kind === 'image'
+      ? `<img src="${url}" alt="" onload="setTimeout(function(){window.focus();window.print();},60)">`
+      : `<pre>${esc(await blob.text())}</pre><script>setTimeout(function(){window.focus();window.print();},60);</script>`;
+    const frame = h('iframe', { class: 'print-frame', 'aria-hidden': 'true', title: 'print' });
+    frame.srcdoc = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(f.title)}</title><style>html,body{margin:0}img{display:block;max-width:100%;max-height:97vh;margin:0 auto}pre{font:12px/1.45 Consolas,monospace;white-space:pre-wrap;word-break:break-word;margin:10mm}@page{margin:10mm}</style></head><body>${inner}</body></html>`;
+    document.body.appendChild(frame);
+    setTimeout(() => { frame.remove(); URL.revokeObjectURL(url); }, 120000);
+  },
+  async share(id) {
+    const f = store.file(id); if (!f) return;
+    let file = null;
+    try {
+      const blob = await store.getBlob(id);
+      if (blob) file = new File([blob], f.originalName || (f.title + (f.ext ? '.' + f.ext : '')), { type: f.mime || blob.type || 'application/octet-stream' });
+    } catch { file = null; }
+    try {
+      if (file && navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: f.title }); return; }
+      if (typeof navigator.share === 'function') { await navigator.share({ title: f.title, text: f.title }); return; }
+      await actions.download(id);
+    } catch (err) {
+      if (err?.name === 'AbortError') return;   // the share sheet was closed
+      toast(t('share.failed'), { type: 'error', duration: 6000 });
+    }
+  },
   async download(id) {
     const f = store.file(id); if (!f) return;
     const blob = await store.getBlob(id);
@@ -108,6 +141,8 @@ export const actions = {
     items.push({ custom: cp });
     items.push({ separator: true });
     if (single) items.push({ label: t('action.download'), icon: 'download', onClick: () => actions.download(single.id) });
+    if (single && typeof navigator.share === 'function') items.push({ label: t('action.share'), icon: 'share', onClick: () => actions.share(single.id) });
+    if (single && ['pdf', 'image', 'text', 'code'].includes(single.kind)) items.push({ label: t('action.print'), icon: 'printer', onClick: () => actions.print(single.id), kbd: 'Ctrl+P' });
     items.push({ label: t('action.details'), icon: 'info', onClick: () => { store.select(ids); app.setDetails(true); } });
     items.push({ separator: true });
     items.push({ label: t('action.delete'), icon: 'trash', danger: true, onClick: () => actions.trash(ids), kbd: 'Del' });

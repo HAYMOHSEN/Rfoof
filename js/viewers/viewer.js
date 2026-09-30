@@ -50,11 +50,12 @@ class Viewer {
     this.btnFind = ib('search', t('viewer.textSearch'), () => this.toggleFind());
     this.btnCloud = ib('cloud', t('viewer.cloudPreview'), () => this.cloudPreview(true));
     this.btnStar = ib('star', t('action.star'), () => { const f = this.file(); if (f) actions.star([f.id], !f.starred).then(() => this.updateStar()); });
+    this.btnPrint = ib('printer', t('action.print'), () => { const f = this.file(); if (f) actions.print(f.id); }, 'v-print');
     this.btnDownload = ib('download', t('action.download'), () => { const f = this.file(); if (f) actions.download(f.id); }, 'v-dl');
     this.btnInfo = ib('info', t('viewer.info'), () => this.toggleInfo());
     this.btnMore = ib('more-v', t('action.more'), (e) => { const f = this.file(); if (f) actions.fileMenu([f.id], { anchor: e.currentTarget, align: 'end' }); });
     this.btnFull = ib('fullscreen', t('viewer.fullscreen'), () => { if (document.fullscreenElement) document.exitFullscreen(); else this.root.requestFullscreen?.(); }, 'v-full');
-    top.append(this.btnClose, this.title, this.meta, this.btnZoomOut, this.zoomLabel, this.btnZoomIn, this.btnFit, this.btnRotate, this.btnFind, this.btnCloud, this.btnStar, this.btnDownload, this.btnFull, this.btnInfo, this.btnMore);
+    top.append(this.btnClose, this.title, this.meta, this.btnZoomOut, this.zoomLabel, this.btnZoomIn, this.btnFit, this.btnRotate, this.btnFind, this.btnCloud, this.btnStar, this.btnPrint, this.btnDownload, this.btnFull, this.btnInfo, this.btnMore);
     const body = h('div', { class: 'viewer-body' });
     this.stage = h('div', { class: 'viewer-stage' });
     this.side = h('div', { class: 'viewer-side', hidden: true });
@@ -111,6 +112,7 @@ class Viewer {
   onKey(e) {
     if (['INPUT', 'TEXTAREA'].includes(e.target.tagName) && e.key !== 'Escape') return;
     const rtl = isRTL();
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'p') { e.preventDefault(); e.stopPropagation(); const f = this.file(); if (f) actions.print(f.id); return; }
     switch (e.key) {
       case 'Escape': e.preventDefault(); e.stopPropagation(); if (!this.findBox.hidden) this.toggleFind(false); else this.close(); break;
       case 'ArrowRight': e.preventDefault(); this.step(rtl ? -1 : 1); break;

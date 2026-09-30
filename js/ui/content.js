@@ -9,6 +9,7 @@ import { highlight, snippet } from '../search.js';
 import { promptDialog } from './dialog.js';
 import { colorPicker } from './pickers.js';
 import { app } from '../app.js';
+import * as expiry from '../expiry.js';
 
 const GAP = 12;
 
@@ -52,8 +53,8 @@ export class ContentView {
       crumbs.appendChild(crumb(t('nav.home'), { type: 'all' }, false, '', 'home'));
       path.forEach((fo, i) => { crumbs.appendChild(sep()); crumbs.appendChild(crumb(fo.name, { type: 'folder', id: fo.id }, i === path.length - 1, fo.id)); });
     } else {
-      const labels = { all: t('nav.allFiles'), recent: t('nav.recent'), starred: t('nav.starred'), trash: t('nav.trash'), cloud: t('nav.cloudOnly'), search: t('search.results') };
-      const ics = { all: 'layers', recent: 'clock', starred: 'star', trash: 'trash', cloud: 'cloud', search: 'search', tag: 'tag', kind: 'file' };
+      const labels = { all: t('nav.allFiles'), recent: t('nav.recent'), starred: t('nav.starred'), expiring: t('nav.expiring'), trash: t('nav.trash'), cloud: t('nav.cloudOnly'), search: t('search.results') };
+      const ics = { all: 'layers', recent: 'clock', starred: 'star', expiring: 'calendar', trash: 'trash', cloud: 'cloud', search: 'search', tag: 'tag', kind: 'file' };
       let label = labels[v.type] || '';
       if (v.type === 'tag') label = v.tag;
       if (v.type === 'kind') { label = t('kind.' + v.kind); }
@@ -145,6 +146,7 @@ export class ContentView {
     if (v.type === 'all') { ic = 'upload'; title = t('empty.all'); hint = t('empty.allHint'); }
     else if (v.type === 'recent') { ic = 'clock'; title = t('empty.recent'); hint = ''; }
     else if (v.type === 'starred') { ic = 'star'; title = t('empty.starred'); hint = t('empty.starredHint'); }
+    else if (v.type === 'expiring') { ic = 'calendar'; title = t('empty.expiring'); hint = t('empty.expiringHint'); }
     else if (v.type === 'trash') { ic = 'trash'; title = t('trash.empty'); hint = t('trash.hint'); }
     else if (v.type === 'tag') { ic = 'tag'; title = t('empty.tag'); hint = ''; }
     else if (v.type === 'kind') { ic = KIND_ICON[v.kind]; title = t('empty.kind'); hint = ''; }
@@ -166,6 +168,7 @@ export class ContentView {
       h('span', { html: folderTileSvg(COLORS[fo.color] || fo.color || COLORS.gray, fo.icon, 44) }),
       h('div', { class: 'grow', style: { minWidth: 0 } }, h('div', { class: 'name', text: fo.name }), h('div', { class: 'meta', text: t('folder.count', { files: fmtNum(stats.files), folders: fmtNum(stats.folders) }) })),
       h('button', { class: 'icon-btn sm', title: t('action.more'), onclick: (e) => { e.stopPropagation(); actions.folderMenu(fo.id, { anchor: e.currentTarget, align: 'end' }); } }, icon('more-v', { size: 16 })));
+    card.style.setProperty('--fc', COLORS[fo.color] || fo.color || COLORS.gray);
     if (!trashed) { makeDropTarget(card, { folderId: fo.id }); makeDragSource(card, () => ({ ids: [fo.id], kind: 'folder' })); }
     // mobile: single tap opens
     card.addEventListener('pointerup', (e) => { if (e.pointerType === 'touch' && !trashed) actions.openFolder(fo.id); });
@@ -248,6 +251,7 @@ export class ContentView {
     body.appendChild(h('div', { class: 'title', html: q ? highlight(f.title, q) : undefined, text: q ? undefined : f.title }));
     if (f.tags?.length) { const tg = h('div', { class: 'tags' }); f.tags.slice(0, 3).forEach(x => tg.appendChild(h('span', { class: 'chip', text: x }))); if (f.tags.length > 3) tg.appendChild(h('span', { class: 'chip', text: '+' + (f.tags.length - 3) })); body.appendChild(tg); }
     const meta = h('div', { class: 'meta' }, h('span', { class: 'bdi', text: (f.ext || t('kind.' + f.kind)).toUpperCase() }), ' · ', h('span', { class: 'ltr', text: formatBytes(f.size, locale()) }), ' · ', h('span', { class: 'bdi', text: fmtDate(f.addedAt) }));
+    const ex = expiry.chip(f, 11); if (ex) body.appendChild(h('div', { class: 'expiry-row' }, ex));
     body.appendChild(meta);
     // one line in a narrow card: start just before the hit so the highlighted word stays visible
     if (this.snippets.has(f.id)) { const sn = h('div', { class: 'result-snippet' }); store.getText(f.id).then(txt => { sn.innerHTML = highlight(snippet(txt, q, 40, 12), q); }); body.appendChild(sn); }
@@ -266,6 +270,7 @@ export class ContentView {
     title.appendChild(h('span', { class: 'ellipsis', html: q ? highlight(f.title, q) : undefined, text: q ? undefined : f.title }));
     if (f.starred) title.appendChild(h('span', { style: { color: '#f5c518', display: 'inline-flex' } }, icon('star', { size: 13 })));
     if (!f.hasBlob) title.appendChild(h('span', { class: 'muted', style: { display: 'inline-flex' }, title: t('details.sync.cloud') }, icon('cloud', { size: 14 })));
+    const exr = expiry.chip(f, 11); if (exr) title.appendChild(exr);
     row.appendChild(title);
     const tg = h('div', { class: 'tags' }); (f.tags || []).slice(0, 3).forEach(x => tg.appendChild(h('span', { class: 'chip', text: x }))); row.appendChild(tg);
     row.appendChild(h('div', { class: 'c type', text: (f.ext || f.kind).toUpperCase() }));

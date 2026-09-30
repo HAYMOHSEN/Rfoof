@@ -629,3 +629,74 @@ body.has-bulk .toasts { bottom: 84px; }
   }
   .topbar button, .topbar input, .topbar a, .topbar select, .topbar .searchbox, .topbar [role="button"] { -webkit-app-region: no-drag; app-region: no-drag; }
 }
+
+/* ============================================================
+   2.2 – visual refresh (layered on top of the styles above)
+   ============================================================ */
+:root { --radius: 10px; --radius-lg: 16px; --shadow-1: 0 1px 2px rgba(0,0,0,.05), 0 1px 3px rgba(0,0,0,.04); --shadow-2: 0 10px 28px rgba(0,0,0,.12), 0 2px 6px rgba(0,0,0,.06); }
+:root[data-theme="dark"] { --shadow-2: 0 12px 32px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.35); }
+
+/* frame: a faint accent wash behind the top bar and sidebar, like Windows 11's Mica */
+.app { background: radial-gradient(1100px 560px at 0% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%), var(--bg); }
+[dir="rtl"] .app { background: radial-gradient(1100px 560px at 100% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 70%), var(--bg); }
+.topbar { background: transparent; }
+.brand > span:last-child { font-size: 16px; letter-spacing: -.01em; }
+.brand .logo { box-shadow: 0 2px 6px rgba(0,0,0,.18); }
+.searchbox { border-radius: 18px; padding: 0 12px; }
+.main, .details { box-shadow: var(--shadow-1); }
+
+/* sidebar */
+.nav-item .count, .tree-item .count { min-width: 20px; height: 18px; padding: 0 6px; border-radius: 9px; background: var(--surface-active); color: var(--text-2); display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-variant-numeric: tabular-nums; }
+.nav-item.active .count, .tree-item.active .count { background: var(--accent-soft); color: var(--accent); }
+.nav-title { letter-spacing: .06em; }
+
+/* toolbar */
+.toolbar .count-label { padding: 3px 8px; border-radius: 12px; background: var(--surface-3); }
+
+/* folder cards: a whisper of the folder's colour, lift on hover */
+.folder-card { padding: 12px 14px; border-radius: 12px; background: var(--surface); transition: background .15s, box-shadow .15s, border-color .15s, transform .15s var(--ease); }
+.folder-card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(90deg, color-mix(in srgb, var(--fc, transparent) 11%, transparent), transparent 58%); pointer-events: none; }
+[dir="rtl"] .folder-card::before { background: linear-gradient(270deg, color-mix(in srgb, var(--fc, transparent) 11%, transparent), transparent 58%); }
+.folder-card > * { position: relative; }
+.folder-card:hover { transform: translateY(-1px); box-shadow: var(--shadow-2); background: var(--surface); border-color: color-mix(in srgb, var(--fc, var(--border-strong)) 40%, var(--border)); }
+.folder-card.selected { background: var(--accent-soft); }
+.folder-card .name { font-size: 14px; }
+.folder-card .meta { margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.print-frame { position: fixed; right: 0; bottom: 0; width: 0; height: 0; border: 0; opacity: 0; pointer-events: none; }
+
+/* file cards */
+.file-card { border-radius: 12px; transition: box-shadow .15s, border-color .15s, background .15s, transform .15s var(--ease); }
+.file-card:hover { transform: translateY(-2px); }
+.file-card .thumb { background: linear-gradient(180deg, var(--surface-3), var(--surface-2)); }
+.file-card .thumb .big-icon { width: 58px; height: 70px; border-radius: 10px; box-shadow: 0 6px 14px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.25); }
+.file-card .body { padding: 9px 12px 8px; }
+.file-card .title { font-size: 13.5px; }
+.file-card .expiry-row { display: flex; height: 20px; overflow: hidden; }
+.file-row { border-radius: 8px; }
+
+/* expiry chips */
+.chip.expiry { height: 20px; font-size: 11px; padding: 0 7px; gap: 4px; font-weight: 600; background: var(--accent-soft); color: var(--accent); }
+.chip.expiry.soon { background: rgba(217,119,6,.14); color: #b45309; }
+.chip.expiry.today, .chip.expiry.expired { background: var(--danger-soft); color: var(--danger); }
+:root[data-theme="dark"] .chip.expiry.soon { color: #fbbf24; }
+:root[data-theme="dark"] .chip.expiry.today, :root[data-theme="dark"] .chip.expiry.expired { color: #ff8a8e; }
+.file-row .title .chip.expiry { flex: none; }
+.details .chip.expiry { height: 24px; font-size: 12px; }
+.details input[type="date"].input { flex: 1; min-width: 0; }
+
+/* empty states */
+.empty-state .ic { width: 76px; height: 76px; padding: 20px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); margin-bottom: 12px; }
+.empty-state h3 { font-size: 18px; color: var(--text); }
+
+/* details */
+.details .preview { background: linear-gradient(180deg, var(--surface-3), var(--surface-2)); border-radius: 12px; }
+.details .preview .big-icon { box-shadow: 0 8px 18px rgba(0,0,0,.18); }
+
+/* dialogs, menus, toasts, buttons */
+.dialog { border-radius: 16px; }
+.menu { border-radius: 10px; }
+.toast { border-radius: 12px; }
+.btn.primary { box-shadow: 0 1px 2px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.12); }
+.btn.primary:active:not(:disabled) { box-shadow: none; }
+
+@media (prefers-reduced-motion: reduce) { .folder-card:hover, .file-card:hover { transform: none; } .dialog, .menu, .toast, .overlay { animation: none; } }

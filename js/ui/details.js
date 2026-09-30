@@ -5,6 +5,7 @@ import { t, locale, fmtDateTime, fmtNum } from '../i18n.js';
 import { actions } from './actions.js';
 import { tagEditor, colorPicker } from './pickers.js';
 import { app } from '../app.js';
+import * as expiry from '../expiry.js';
 
 export class DetailsPanel {
   constructor(el, { onClose = null } = {}) {
@@ -95,11 +96,20 @@ export class DetailsPanel {
         : h('button', { class: 'btn sm primary', onclick: () => actions.openFile(f.id) }, icon('eye', { size: 16 }), t('action.open')),
       h('button', { class: `icon-btn ${f.starred ? 'active' : ''}`, title: f.starred ? t('action.unstar') : t('action.star'), onclick: () => actions.star([f.id], !f.starred) }, icon('star', { size: 18 })),
       h('button', { class: 'icon-btn', title: t('action.download'), onclick: () => actions.download(f.id) }, icon('download', { size: 18 })),
+      typeof navigator.share === 'function' ? h('button', { class: 'icon-btn', title: t('action.share'), onclick: () => actions.share(f.id) }, icon('share', { size: 18 })) : null,
       h('button', { class: 'icon-btn', title: t('action.move'), onclick: () => actions.move([f.id]) }, icon('folder-input', { size: 18 })),
       h('button', { class: 'icon-btn', title: t('action.more'), onclick: (e) => actions.fileMenu([f.id], { anchor: e.currentTarget }) }, icon('more-h', { size: 18 }))));
     // tags / color / notes
     body.appendChild(h('div', { class: 'field' }, h('label', { text: t('label.tags') }), tagEditor(f.tags, (tags) => store.updateFile(f.id, { tags }))));
     body.appendChild(h('div', { class: 'field' }, h('label', { text: t('label.color') }), colorPicker(f.color, (c) => store.updateFile(f.id, { color: c }))));
+    // expiry date (IDs, contracts, certificates …)
+    const dateInput = h('input', { class: 'input', type: 'date', value: expiry.isValidIso(f.expiresAt) ? f.expiresAt : '', 'aria-label': t('label.expires') });
+    const exInfo = h('div', { class: 'row', style: { minHeight: '24px' } });
+    const refreshEx = () => { clear(exInfo); const c = expiry.chip(store.file(f.id) || f); if (c) exInfo.appendChild(c); else exInfo.appendChild(h('span', { class: 'hint', text: t('label.expiresHint') })); };
+    dateInput.addEventListener('change', async () => { const v = dateInput.value; await store.updateFile(f.id, { expiresAt: expiry.isValidIso(v) ? v : '' }); refreshEx(); });
+    const clearBtn = h('button', { class: 'icon-btn sm', title: t('action.clear'), onclick: async () => { dateInput.value = ''; await store.updateFile(f.id, { expiresAt: '' }); refreshEx(); } }, icon('x', { size: 16 }));
+    refreshEx();
+    body.appendChild(h('div', { class: 'field' }, h('label', { text: t('label.expires') }), h('div', { class: 'row' }, dateInput, clearBtn), exInfo));
     const notes = h('textarea', { class: 'textarea', placeholder: t('label.notesPlaceholder'), 'aria-label': t('label.notes') }); notes.value = f.notes || '';
     const saveNotes = debounce(() => { if (notes.value !== store.file(f.id)?.notes) store.updateFile(f.id, { notes: notes.value }, { emit: false }); }, 500);
     notes.addEventListener('input', saveNotes);

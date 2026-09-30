@@ -23,6 +23,7 @@ import { indexer, importEvents } from './import.js';
 import { license } from './license.js';
 import { startAutoBackup } from './autobackup.js';
 import { startProtection, restoreIfEmpty } from './protect.js';
+import * as expiry from './expiry.js';
 import { initInstall, install } from './install.js';
 
 export const app = {
@@ -48,6 +49,7 @@ export const app = {
     startAutoBackup();
     startProtection();
     restoreIfEmpty();
+    setTimeout(() => this.remindExpiry(), 5000);
     // 2.0.2 reads Arabic PDFs (and Excel cells typed as inline text) correctly: index those files once more
     if ((store.settings.indexVersion || 1) < 2) {
       for (const f of Array.from(store.files.values())) {
@@ -70,12 +72,22 @@ export const app = {
     toast(t('rate.prompt'), { duration: 15000, action: { label: t('rate.button'), fn: () => license.openReview() } });
   },
 
+  // Once a day: documents that have expired or expire within a week.
+  remindExpiry() {
+    const due = expiry.due(expiry.REMIND_DAYS);
+    if (!due.length) return;
+    const today = expiry.todayIso();
+    if (store.settings.expiryReminded === today) return;
+    store.setSetting('expiryReminded', today);
+    toast(t('expiry.remind', { n: due.length }), { duration: 15000, action: { label: t('expiry.show'), fn: () => store.navigate({ type: 'expiring' }) } });
+  },
+
   handleUrlParams() {
     const q = new URLSearchParams(location.search);
     if (![...q.keys()].length) return;
     const action = q.get('action'), view = q.get('view');
     history.replaceState(null, '', location.pathname + location.hash);
-    if (view === 'starred' || view === 'recent' || view === 'trash') store.navigate({ type: view });
+    if (['starred', 'recent', 'trash', 'expiring'].includes(view)) store.navigate({ type: view });
     if (action === 'import') actions.import([]);
   },
 
@@ -176,6 +188,7 @@ export const app = {
       if (mod && e.key.toLowerCase() === 'i' && !inInput) { e.preventDefault(); actions.import([]); return; }
       if (mod && e.shiftKey && e.key.toLowerCase() === 'n') { e.preventDefault(); actions.newFolder(store.view.type === 'folder' ? store.view.id : ''); return; }
       if (mod && e.key.toLowerCase() === 'd' && !inInput) { e.preventDefault(); this.setDetails(); return; }
+      if (mod && e.key.toLowerCase() === 'p' && !inInput && store.selection.size === 1 && !document.querySelector('.viewer')) { e.preventDefault(); actions.print(Array.from(store.selection)[0]); return; }
       if (mod && e.key === ',') { e.preventDefault(); this.openSettings(); return; }
       if (e.key === 'Escape' && !inInput && !topDialog() && !isMenuOpen() && !document.querySelector('.viewer')) store.clearSelection();
     });

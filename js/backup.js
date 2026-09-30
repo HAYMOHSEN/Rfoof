@@ -37,7 +37,7 @@ function folderZipPath(folderId) {
   return parts.length ? 'Library/' + parts.join('/') + '/' : 'Library/';
 }
 
-const FILE_FIELDS = ['id', 'folderId', 'title', 'originalName', 'ext', 'kind', 'mime', 'size', 'tags', 'notes', 'color', 'starred', 'createdAt', 'updatedAt', 'addedAt', 'deletedAt', 'hash'];
+const FILE_FIELDS = ['id', 'folderId', 'title', 'originalName', 'ext', 'kind', 'mime', 'size', 'tags', 'notes', 'color', 'starred', 'expiresAt', 'createdAt', 'updatedAt', 'addedAt', 'deletedAt', 'hash'];
 const FOLDER_FIELDS = ['id', 'parentId', 'name', 'color', 'icon', 'order', 'createdAt', 'updatedAt', 'deletedAt'];
 const pick = (o, fields) => Object.fromEntries(fields.map(k => [k, o[k]]));
 

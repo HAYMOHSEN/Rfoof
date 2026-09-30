@@ -362,13 +362,14 @@ class Store extends Emitter {
       case 'folder': files = this.filesIn(v.id); folders = this.childFolders(v.id); break;
       case 'recent': files = this.liveFiles().sort((a, b) => (Math.max(b.lastOpened, b.addedAt) - Math.max(a.lastOpened, a.addedAt))).slice(0, 200); break;
       case 'starred': files = this.liveFiles().filter(f => f.starred); break;
+      case 'expiring': files = this.liveFiles().filter(f => typeof f.expiresAt === 'string' && f.expiresAt).sort((a, b) => (a.expiresAt < b.expiresAt ? -1 : a.expiresAt > b.expiresAt ? 1 : 0)); break;
       case 'tag': files = this.liveFiles().filter(f => (f.tags || []).includes(v.tag)); break;
       case 'kind': files = this.liveFiles().filter(f => f.kind === v.kind); break;
       case 'cloud': files = this.liveFiles().filter(f => !f.hasBlob); break;
       case 'trash': { const t = this.trashedItems(); files = t.files; folders = t.folders; break; }
       case 'search': files = v.results ? v.results.map(r => r.file) : []; break;
     }
-    if (v.type !== 'recent' && v.type !== 'search') {
+    if (v.type !== 'recent' && v.type !== 'search' && v.type !== 'expiring') {
       const s = this.settings.sort || { field: 'addedAt', dir: -1 };
       const cmp = makeComparator(s.field === 'title' ? 'title' : s.field, s.dir, locale());
       files = files.slice().sort(cmp);

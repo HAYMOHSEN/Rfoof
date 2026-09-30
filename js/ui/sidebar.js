@@ -10,6 +10,7 @@ import { license, licenseEvents } from '../license.js';
 import { install, installEvents } from '../install.js';
 import * as bk from '../backup.js';
 import { isProtected, askToProtect } from '../protect.js';
+import * as expiry from '../expiry.js';
 import { toast } from './toast.js';
 
 export class Sidebar {
@@ -47,6 +48,7 @@ export class Sidebar {
     quick.appendChild(this.navItem({ label: t('nav.allFiles'), ic: 'layers', view: { type: 'all' }, count: live.length, active: v.type === 'all', dropFolder: '' }));
     quick.appendChild(this.navItem({ label: t('nav.recent'), ic: 'clock', view: { type: 'recent' }, active: v.type === 'recent' }));
     quick.appendChild(this.navItem({ label: t('nav.starred'), ic: 'star', view: { type: 'starred' }, count: live.filter(f => f.starred).length || null, active: v.type === 'starred' }));
+    if (expiry.dated().length) quick.appendChild(this.navItem({ label: t('nav.expiring'), ic: 'calendar', view: { type: 'expiring' }, count: expiry.due().length || null, active: v.type === 'expiring' }));
     if (cloudOnly) quick.appendChild(this.navItem({ label: t('nav.cloudOnly'), ic: 'cloud', view: { type: 'cloud' }, count: cloudOnly, active: v.type === 'cloud' }));
     quick.appendChild(this.navItem({ label: t('nav.trash'), ic: 'trash', view: { type: 'trash' }, count: (trash.files.length + trash.folders.length) || null, active: v.type === 'trash' }));
     el.appendChild(quick);
