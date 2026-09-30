@@ -5,7 +5,7 @@
 export const APP = {
   name: 'Rfoof',
   nameAr: 'رفوف',
-  version: '2.0.4',
+  version: '2.1.0',
 
   // ---- Offline-first, no cloud sync required ----
   // This version runs 100% locally. Users can export their library
@@ -14,7 +14,7 @@ export const APP = {
 
   // Links shown in Settings → About
   website: '',
-  supportEmail: '',
+  supportEmail: 'haymohse@gmail.com',
   privacyUrl: './privacy.html',
 
   // ---- Licensing (Microsoft Store edition) --------------------

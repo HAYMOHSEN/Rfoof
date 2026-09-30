@@ -15,7 +15,7 @@ test('off by default and for unknown values', () => {
   store.settings.autoBackup = 'every-minute'; assert.equal(interval(), 0);
 });
 test('the offered choices', () => {
-  assert.deepEqual(Object.keys(INTERVALS), ['off', 'hourly', 'h6', 'daily', 'weekly', 'monthly']);
+  assert.deepEqual(Object.keys(INTERVALS), ['off', 'change', 'hourly', 'h6', 'daily', 'weekly', 'monthly']);
   assert.equal(INTERVALS.daily, DAY); assert.equal(INTERVALS.weekly, 7 * DAY);
 });
 test('folder backups: due one interval after the last backup', () => {

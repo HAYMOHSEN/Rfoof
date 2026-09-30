@@ -8,6 +8,8 @@ import { db } from '../db.js';
 import { app } from '../app.js';
 import { license, licenseEvents } from '../license.js';
 import { install, installEvents } from '../install.js';
+import * as bk from '../backup.js';
+import { isProtected, askToProtect } from '../protect.js';
 import { toast } from './toast.js';
 
 export class Sidebar {
@@ -16,7 +18,7 @@ export class Sidebar {
     this.tagsExpanded = false;
     this.render = this.render.bind(this);
     this.unsubs = ['folders', 'files', 'nav', 'ready'].map(ev => store.on(ev, () => this.schedule()));
-    this.unsubs.push(store.on('settings', (k) => { if (k === 'expanded' || k === 'licensed' || k === 'trialImports') this.schedule(); }));
+    this.unsubs.push(store.on('settings', (k) => { if (['expanded', 'licensed', 'trialImports', 'backupDir', 'autoBackup'].includes(k)) this.schedule(); }));
     this.unsubs.push(licenseEvents.on('change', () => this.schedule()));
     this.unsubs.push(installEvents.on('change', () => this.schedule()));
     this.render();
@@ -110,6 +112,11 @@ export class Sidebar {
         if (r === 'accepted') toast(t('install.done'), { type: 'success', duration: 6000 });
         this.schedule();
       } }, icon('download', { size: 16 }), h('span', { class: 'grow ellipsis', text: t('install.button') })));
+    }
+    if (bk.folderBackupSupported() && store.liveFiles().length && !isProtected()) {
+      foot.appendChild(h('button', { class: 'trial-badge warn', onclick: () => askToProtect() },
+        h('span', { class: 'row' }, icon('alert', { size: 16 }), h('span', { class: 'grow ellipsis', text: t('protect.badge') })),
+        h('span', { class: 'link', text: t('protect.badgeAction') })));
     }
     if (license.isTrial()) {
       foot.appendChild(h('button', { class: 'trial-badge', onclick: () => app.openSettings('license') },

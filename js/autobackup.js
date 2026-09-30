@@ -18,11 +18,14 @@ import { toast } from './ui/toast.js';
 
 const HOUR = 3600000, DAY = 24 * HOUR;
 /** Choices offered in Settings ▸ Backup (key → interval in ms). */
-export const INTERVALS = { off: 0, hourly: HOUR, h6: 6 * HOUR, daily: DAY, weekly: 7 * DAY, monthly: 30 * DAY };
+export const INTERVALS = { off: 0, change: 0, hourly: HOUR, h6: 6 * HOUR, daily: DAY, weekly: 7 * DAY, monthly: 30 * DAY };
 const CHECK_EVERY = 5 * 60000;        // while the app is open
 const REMIND_AGAIN_AFTER = 2 * HOUR;  // don't nag: at most one reminder toast per 2 hours
+const AFTER_CHANGE = 6000;            // "after every change": quiet time before the copy starts
 
 export function interval() { return INTERVALS[store.settings.autoBackup] || 0; }
+/** "After every change": the library is copied a few seconds after anything is added, renamed, moved or deleted. */
+export function isChangeMode() { return store.settings.autoBackup === 'change'; }
 
 /** Time of the last backup that counts for the schedule (folder when one is set up, otherwise ZIP). */
 export function lastBackupTime() {
@@ -39,17 +42,27 @@ export function nextDue() {
 export function isDue(now = Date.now()) { const d = nextDue(); return d > 0 && now >= d; }
 
 let timer = null, running = false, lastReminder = 0;
+let dirty = true, changeTimer = null;   // change mode: something changed since the last copy (true at start: catch up)
 
 export function startAutoBackup() {
   if (timer) return;
   setTimeout(check, 15000);   // let the app finish starting first
   timer = setInterval(check, CHECK_EVERY);
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') check(); });
-  store.on('settings', (k) => { if (k === 'autoBackup') { lastReminder = 0; check(); } });
+  store.on('settings', (k) => { if (k === 'autoBackup' || k === 'backupDir') { lastReminder = 0; dirty = true; check(); } });
+  const changed = () => {
+    dirty = true;
+    if (!isChangeMode()) return;
+    clearTimeout(changeTimer);
+    changeTimer = setTimeout(check, AFTER_CHANGE);
+  };
+  store.on('files', changed);
+  store.on('folders', changed);
 }
 
 export async function check() {
-  if (running || !isDue() || !store.liveFiles().length) return;
+  if (running || !store.liveFiles().length) return;
+  if (isChangeMode() ? !dirty : !isDue()) return;
   const dir = bk.rememberedFolder();
   if (dir) {
     let state = 'denied';
@@ -65,10 +78,12 @@ async function run(dir, fromClick = false) {
   if (running) return;
   running = true;
   try {
+    dirty = false;
     const r = await bk.exportToFolder(dir);
     if (r.written) toast(t('autobackup.done', { n: r.written, name: r.name }), { type: 'success', duration: 5000 });
     else if (fromClick) toast(t('autobackup.upToDate', { name: r.name }), { type: 'success' });
   } catch (err) {
+    dirty = true;
     const msg = err?.code === 'permission' ? t('backup.permission') : (err?.message || String(err));
     toast(t('autobackup.failed', { msg }), { type: 'error', duration: 9000 });
   } finally { running = false; }

@@ -263,6 +263,12 @@ body.has-bulk .toasts { bottom: 84px; }
 .trial-badge .row { width: 100%; }
 .trial-badge:hover { background: var(--accent-soft-2); }
 .trial-badge .link { text-decoration: underline; text-underline-offset: 2px; white-space: nowrap; }
+.trial-badge.warn { background: color-mix(in srgb, #d97706 14%, var(--surface)); color: #b45309; }
+.trial-badge.warn:hover { background: color-mix(in srgb, #d97706 22%, var(--surface)); }
+[data-theme=dark] .trial-badge.warn { color: #fbbf24; }
+.protect-status { margin-bottom: 12px; }
+.protect-status .strong { font-weight: 600; }
+.protect p { margin: 0 0 12px; }
 .install-badge { display: flex; align-items: center; gap: 8px; width: 100%; padding: 9px 10px; margin-bottom: 8px; border-radius: var(--radius); background: var(--accent); color: var(--accent-text); font-size: 12.5px; font-weight: 600; text-align: start; box-shadow: 0 1px 2px rgba(0,0,0,.12); }
 .install-badge:hover { background: var(--accent-hover); }
 .install-badge:disabled { opacity: .6; }

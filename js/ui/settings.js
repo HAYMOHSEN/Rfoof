@@ -9,6 +9,7 @@ import { APP } from '../config.js';
 import { app } from '../app.js';
 import * as bk from '../backup.js';
 import * as ab from '../autobackup.js';
+import { statusText as protectStatus, isProtected } from '../protect.js';
 import { license, licenseEvents } from '../license.js';
 import { install, installEvents } from '../install.js';
 
@@ -95,6 +96,16 @@ export function openSettings(initialTab = 'general') {
 
   const backup = (p) => {
     p.appendChild(h('h3', { text: t('settings.backup') }));
+    // where the files live, and whether they are protected right now
+    const status = h('div', { class: 'card-box protect-status' });
+    const renderStatus = () => {
+      clear(status);
+      const ok = isProtected();
+      status.appendChild(h('div', { class: 'row', style: { gap: '10px', alignItems: 'flex-start' } },
+        icon(ok ? 'check-circle' : 'alert', { size: 20 }), h('div', {}, h('div', { class: 'strong', text: protectStatus() }), h('div', { class: 'muted small', style: { marginTop: '4px' }, text: t('protect.body1') }))));
+    };
+    renderStatus();
+    p.appendChild(status);
     p.appendChild(h('p', { class: 'muted small', text: t('settings.backupDesc') }));
     const prog = h('div', { class: 'progress', style: { display: 'none', margin: '10px 0' } }, h('div'));
     p.appendChild(prog);
@@ -121,6 +132,8 @@ export function openSettings(initialTab = 'general') {
     p.appendChild(h('h4', { text: t('backup.folderTitle') }));
     const box = h('div', { class: 'card-box' });
     const backupTo = (btn, handle) => run(btn, async () => {
+      // choosing a folder is meant as protection: switch automatic backup on unless the user set an interval
+      if ((store.settings.autoBackup || 'off') === 'off') await store.setSetting('autoBackup', 'change');
       const r = await bk.exportToFolder(handle, setProg);
       toast(t('toast.backupFolderDone', { name: r.name, written: r.written, skipped: r.skipped }), { type: 'success', duration: 7000 });
       renderFolder();
@@ -172,12 +185,13 @@ export function openSettings(initialTab = 'general') {
       clear(autoBox);
       const folderMode = bk.folderBackupSupported();
       const hasFolder = !!bk.rememberedFolder();
-      const current = store.settings.autoBackup && ab.INTERVALS[store.settings.autoBackup] ? store.settings.autoBackup : 'off';
+      const current = Object.prototype.hasOwnProperty.call(ab.INTERVALS, store.settings.autoBackup || '') ? store.settings.autoBackup : 'off';
       const sel = h('select', { class: 'select', style: { maxWidth: '240px' }, disabled: folderMode && !hasFolder, onchange: async (e) => { await store.setSetting('autoBackup', e.target.value); renderAuto(); } },
         Object.keys(ab.INTERVALS).map(k => h('option', { value: k, selected: k === current, text: t('autobackup.' + k) })));
       autoBox.appendChild(h('div', { class: 'row wrap', style: { gap: '12px' } }, sel,
         h('span', { class: 'muted small', text: (() => {
           if (folderMode && !hasFolder) return t('autobackup.needFolder');
+          if (current === 'change') return t('autobackup.changeNext');
           const due = ab.nextDue(); if (!due) return '';
           return due <= Date.now() ? t('autobackup.nextNow') : t('autobackup.next', { time: fmtDateTime(due) });
         })() })));
@@ -187,7 +201,7 @@ export function openSettings(initialTab = 'general') {
     renderAuto();
     p.appendChild(autoBox);
     // keep "next backup" and the enabled state current when a folder is chosen, forgotten or backed up
-    paneCleanup = store.on('settings', (k) => { if (['backupDir', 'lastBackup', 'lastZipBackup', 'autoBackup'].includes(k)) renderAuto(); });
+    paneCleanup = store.on('settings', (k) => { if (['backupDir', 'lastBackup', 'lastZipBackup', 'autoBackup'].includes(k)) { renderAuto(); renderStatus(); } });
   };
 
   const storage = (p) => {
@@ -249,6 +263,7 @@ export function openSettings(initialTab = 'general') {
     p.appendChild(h('div', { class: 'row wrap' },
       h('a', { class: 'btn sm', href: APP.privacyUrl, target: '_blank', rel: 'noopener' }, icon('shield', { size: 16 }), t('settings.privacy')),
       h('a', { class: 'btn sm', href: './licenses.html', target: '_blank', rel: 'noopener' }, icon('book', { size: 16 }), t('settings.licenses')),
+      APP.supportEmail ? h('a', { class: 'btn sm', href: 'mailto:' + APP.supportEmail + '?subject=' + encodeURIComponent(APP.name + ' ' + APP.version) }, icon('mail', { size: 16 }), t('settings.contact')) : null,
       license.canRate() ? h('button', { class: 'btn sm', onclick: () => license.openReview() }, icon('star', { size: 16 }), t('rate.button')) : null));
     p.appendChild(h('h4', { text: t('settings.shortcuts') }));
     const sc = h('div', { class: 'shortcut-list' });
